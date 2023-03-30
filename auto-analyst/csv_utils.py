@@ -51,10 +51,11 @@ def clean_date_columns(df: pd.DataFrame) -> pd.DataFrame:
     Clean the date columns of the dataframe
     """
     for column in df.columns:
-        try:
-            df[column] = pd.to_datetime(df[column])
-        except:
-            pass
+        if df[column].dtype != "int":
+            try:
+                df[column] = pd.to_datetime(df[column])
+            except:
+                pass
     return df
 
 
