@@ -4,7 +4,7 @@ Auto-Analyst is a powerful UI tool that simplifies the process of running analyt
 
 ## Demo
 
-![Demo gif](https://github.com/aadityaubhat/auto-analyst/blob/main/auto-analyst/auto-analyst-demo.gif)
+![Demo gif](https://github.com/aadityaubhat/auto-analyst/blob/main/auto_analyst/auto-analyst-demo.gif)
 
 ## Features
 
@@ -21,5 +21,5 @@ To run Auto-Analyst locally do the following steps
 - Clone the repo
 - Create Python virtual environment
 - Install requirements.txt
-- Update auto-analyst/config.py with your OpenAI API key
-- Run `streamlit run /auto-analyst/app.py`
+- Update auto_analyst/config.py with your OpenAI API key
+- Run `streamlit run /auto_analyst/app.py`
