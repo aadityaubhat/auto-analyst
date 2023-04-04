@@ -1,12 +1,15 @@
 import pandas as pd
 import duckdb
-from prompts import (
+from prompts.prompts import (
     render_sql_error_prompt,
     system_sql_prompt,
 )
-from open_ai_utils import get_chat_reply
+from llms.open_ai_utils import get_chat_reply
 
-def execute_query(prompt: str, query: str, data_table: pd.DataFrame, retries=3) -> pd.DataFrame:
+
+def execute_query(
+    prompt: str, query: str, data_table: pd.DataFrame, retries=3
+) -> pd.DataFrame:
     """
     Execute a query on the DuckDB database
     """
@@ -19,6 +22,5 @@ def execute_query(prompt: str, query: str, data_table: pd.DataFrame, retries=3) 
             print(e)
             new_prompt = render_sql_error_prompt(prompt=prompt, query=query, error=e)
             query = get_chat_reply(system_sql_prompt, new_prompt)
-
 
     raise Exception("Could not execute query")

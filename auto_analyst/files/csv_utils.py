@@ -1,6 +1,7 @@
 import pandas as pd
 import re
 
+
 def clean_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Clean the column names of the dataframe
@@ -37,8 +38,9 @@ def clean_columns(df: pd.DataFrame) -> pd.DataFrame:
     df.columns = df.columns.str.replace("6", "", regex=False)
     df.columns = df.columns.str.replace("7", "", regex=False)
     df.columns = df.columns.str.replace("8", "", regex=False)
-    df.columns = df.columns.str.replace("9", "", regex=False)  
+    df.columns = df.columns.str.replace("9", "", regex=False)
     return df
+
 
 def clean_column_types(df: pd.DataFrame) -> pd.DataFrame:
     """
@@ -46,12 +48,15 @@ def clean_column_types(df: pd.DataFrame) -> pd.DataFrame:
     """
     return df.convert_dtypes()
 
+
 def clean_date_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Clean the date columns of the dataframe
     """
     for column in df.columns:
-        if df[column].dtype != "int":
+        try:
+            df[column] = df[column].astype("int")
+        except:
             try:
                 df[column] = pd.to_datetime(df[column])
             except:
@@ -66,6 +71,7 @@ def clean_currency(val):
     # Convert the string to a float
     return float(val)
 
+
 def clean_currency_columns(df: pd.DataFrame) -> pd.DataFrame:
     """
     Clean the currency columns of the dataframe
@@ -77,11 +83,8 @@ def clean_currency_columns(df: pd.DataFrame) -> pd.DataFrame:
             df[col] = df[col].apply(clean_currency)
     return df
 
+
 def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     return clean_currency_columns(
-        clean_date_columns(
-            clean_column_types(
-                clean_columns(df)
-            )
-        )
+        clean_date_columns(clean_column_types(clean_columns(df)))
     )

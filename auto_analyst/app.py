@@ -2,7 +2,7 @@ import streamlit as st
 import streamlit.components.v1 as components
 import pandas as pd
 import auto_analyst
-from html_templates import (
+from html_templates.html_templates import (
     render_output_component,
     render_html_table,
 )

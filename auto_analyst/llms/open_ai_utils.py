@@ -1,6 +1,6 @@
 import openai
 from config import OPENAI_API_KEY
-from prompts import (
+from prompts.prompts import (
     render_agg_plot_prompt,
     render_analytical_prompt,
     render_data_prompt,
