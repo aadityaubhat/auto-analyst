@@ -4,8 +4,9 @@ import redshift_connector
 
 class Redshift(BaseDatabase):
     """Class for Redshift"""
+
     # Implement the abstract methods from BaseDatabase
-    
+
     def __init__(self, host, port, user, password, database):
         """Initialize Redshift"""
         self.host = host
@@ -14,7 +15,7 @@ class Redshift(BaseDatabase):
         self.password = password
         self.database = database
         self._connect()
-    
+
     def _connect(self):
         """Connect to Redshift"""
         self.connection = redshift_connector.connect(
@@ -25,7 +26,7 @@ class Redshift(BaseDatabase):
             database=self.database,
         )
         self.cursor = self.connection.cursor()
-    
+
     def _disconnect(self):
         """Disconnect from Redshift"""
         self.connection.close()
@@ -34,13 +35,11 @@ class Redshift(BaseDatabase):
         """Run query"""
         self.cursor.execute(query)
         return self.cursor.fetch_dataframe()
-    
+
     def list_tables(self):
         """List tables"""
         return self.run_query("select * from pg_tables")
-    
+
     def get_schema(self, table_name: str):
         """Get schema for the given table"""
         return self.run_query(f"select * from {table_name} limit 1")
-    
-    

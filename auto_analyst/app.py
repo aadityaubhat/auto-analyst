@@ -77,6 +77,7 @@ col2.subheader("Analysis")
 placeholder = col2.empty()
 
 if uploaded_file is not None:
+
     @st.cache_data
     def load_data():
         return pd.read_csv(uploaded_file)

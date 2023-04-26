@@ -3,7 +3,8 @@ import jinja2
 environment = jinja2.Environment()
 
 
-output_component_template = environment.from_string("""
+output_component_template = environment.from_string(
+    """
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
@@ -25,13 +26,16 @@ output_component_template = environment.from_string("""
       </div>
         {% endfor %}
     </div>
-    """)
+    """
+)
+
 
 def render_output_component(question_answer):
     return output_component_template.render(question_answer=question_answer)
 
 
-dataframe_template = environment.from_string("""
+dataframe_template = environment.from_string(
+    """
 <div class="dvn-underlay"><canvas data-testid="data-grid-canvas" tabindex="0" width="805"
         height="248"
         style="contain: strict; display: block; cursor: default; width: 805px; height: 248px;">
@@ -75,7 +79,8 @@ dataframe_template = environment.from_string("""
         </div>
     </div>
 </div>
-""")
+"""
+)
 
 
 def render_html_table(columns, rows):
