@@ -3,8 +3,6 @@ venv
 archive.py
 data.csv
 .vscode
-auto_analyst/__pycache__
-auto_analyst/files/__pycache__
-auto_analyst/llms/__pycache__
-auto_analyst/html_templates/__pycache__
-auto_analyst/prompts/__pycache__
+.pytest_cache
+*.egg-info
+*/__pycache__/*
