@@ -1,0 +1,12 @@
+table_name,description
+Album,"Contains information about each album, including the album title and the artist ID associated with the album."
+Artist,"Contains information about each artist, including the artist's name."
+Customer,"Contains information about each customer, including their first name, last name, email, address, city, state, country, postal code, phone, and the employee ID who supports the customer."
+Employee,"Contains information about each employee, including their first name, last name, title, reports to (employee ID of their supervisor), birth date, hire date, email, address, city, state, country, and postal code."
+Genre,"Contains information about each genre, including the genre's name."
+Invoice,"Contains information about each invoice, including the customer ID, invoice date, billing address, billing city, billing state, billing country, and billing postal code."
+InvoiceLine,"Contains information about each line item on an invoice, including the invoice ID, track ID, unit price, and quantity."
+MediaType,"Contains information about each media type, including the media type's name."
+Playlist,"Contains information about each playlist, including the playlist's name."
+PlaylistTrack,"Represents the relationship between playlists and tracks, including the playlist ID and track ID."
+Track,"Contains information about each track, including the track name, album ID, media type ID, genre ID, composer, track length (in milliseconds), bytes, and unit price."

@@ -2,8 +2,10 @@ from auto_analyst.databases.base import BaseDatabase
 import sqlite3
 import pandas as pd
 
+
 class SQLLite(BaseDatabase):
-    """"Class for SQLLite"""
+    """ "Class for SQLLite"""
+
     def __init__(self, db_path=None):
         """Initialize SQLLite"""
         if db_path is None:
@@ -27,7 +29,9 @@ class SQLLite(BaseDatabase):
 
     def list_tables(self):
         """List tables"""
-        return self.run_query("select name as table_name from sqlite_master where type='table'")
+        return self.run_query(
+            "select name as table_name from sqlite_master where type='table'"
+        )
 
     def get_schema(self, table_name: str):
         """Get schema for the given table"""
