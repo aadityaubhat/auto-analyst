@@ -19,8 +19,8 @@ class OpenAILLM(BaseLLM):
         self,
         api_key: str,
         model: Model,
-        temperature: float = 0.1,
-        frequency_penalty: float = 0.1,
+        temperature: float = 0.2,
+        frequency_penalty: float = 0,
         presence_penalty: float = 0,
     ):
         """Initialize OpenAI LLM"""
