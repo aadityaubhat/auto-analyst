@@ -12,6 +12,7 @@ def sample_datacatalog():
     yield sample_datacatalog
 
 
+@pytest.mark.llm
 def test_get_source_tables(sample_datacatalog):
     question = "What is the total sales by country?"
     input_tables = sample_datacatalog.get_source_tables(question)
