@@ -10,6 +10,7 @@ import pandas as pd
 class Analysis:
     def __init__(self, question: str) -> None:
         self._question = question
+        self._analysis_type = None
         self._metadata = {}
         self._query = None
         self._result_data = None
@@ -54,3 +55,13 @@ class Analysis:
     def result_plot(self, result_plot: Union[Figure, None]) -> None:
         """Add result plot to the analysis"""
         self._result_plot = result_plot
+
+    @property
+    def analysis_type(self) -> str:
+        """Get analysis type"""
+        return self._analysis_type
+    
+    @analysis_type.setter
+    def analysis_type(self, analysis_type: str) -> None:
+        """Set analysis type"""
+        self._analysis_type = analysis_type

@@ -38,3 +38,12 @@ def test_result_plot(analysis):
     assert analysis.result_plot == px.bar(
         x=["giraffes", "orangutans", "monkeys"], y=[20, 14, 23]
     )
+
+def test_analysis_type(analysis):
+    assert analysis.analysis_type is None
+    analysis.analysis_type = "query"
+    assert analysis.analysis_type == "query"
+    analysis.analysis_type = "aggregation"
+    assert analysis.analysis_type == "aggregation"
+    analysis.analysis_type = "plot"
+    assert analysis.analysis_type == "plot"
