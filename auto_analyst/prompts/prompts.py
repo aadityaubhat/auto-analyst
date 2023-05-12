@@ -73,6 +73,7 @@ data_examples = [
     },
 ]
 
+
 data_template = environment.from_string(
     """
 Determine whether the asked question can be answered using given data. Answer yes or no.
@@ -222,3 +223,9 @@ def render_transform_prompt(table_name, description, schema, question):
     return transform_template.render(
         table_name=table_name, description=description, schema=schema, question=question
     )
+
+
+data_catalog_template = environment.from_string(
+    """
+"""
+)
