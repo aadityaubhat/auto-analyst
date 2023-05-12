@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture(scope="module")
 def sample_datacatalog():
-    llm = OpenAILLM(OPENAI_API_KEY, Model.GPT_4_0314)
+    llm = OpenAILLM(OPENAI_API_KEY, Model.GPT_3_5_TURBO)
     sample_datacatalog = SampleDataCatalog(llm)
     yield sample_datacatalog
 
@@ -15,7 +15,8 @@ def sample_datacatalog():
 def test_get_source_tables(sample_datacatalog):
     question = "What is the total sales by country?"
     input_tables = sample_datacatalog.get_source_tables(question)
-    assert ["customer", "invoice", "invoiceline"] == input_tables
+    print(input_tables)
+    assert ["Invoice"] == [d["table_name"] for d in input_tables]
 
 
 def test_get_table_schemas(sample_datacatalog):

@@ -1,5 +1,8 @@
 from auto_analyst.data_catalog.base import BaseDataCatalog
-from typing import List
+from typing import (
+    List,
+    Dict,
+)
 import pandas as pd
 from auto_analyst.llms.base import BaseLLM
 from auto_analyst.prompts.data_catalog import (
@@ -26,7 +29,7 @@ class SampleDataCatalog(BaseDataCatalog):
         """Get table schema"""
         return self.db.get_schema(table_name)
 
-    def get_source_tables(self, question: str) -> List[str]:
+    def get_source_tables(self, question: str) -> List[Dict]:
         """Get source tables for the given question returns empty list if no tables found"""
         tables_df = self._get_all_tables()
 
@@ -39,7 +42,8 @@ class SampleDataCatalog(BaseDataCatalog):
         if response == "No Tables Found":
             return []
         else:
-            return [tbl.strip().lower() for tbl in response.split(",")]
+            table_list = [tbl for tbl in response.split(",")]
+            return tables_df[tables_df.table_name.isin(table_list)].to_dict("records")
 
     def get_table_schemas(self, table_list: List[str]) -> List[pd.DataFrame]:
         """Get schema for schema"""
