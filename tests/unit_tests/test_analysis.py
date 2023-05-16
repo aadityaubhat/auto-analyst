@@ -39,6 +39,7 @@ def test_result_plot(analysis):
         x=["giraffes", "orangutans", "monkeys"], y=[20, 14, 23]
     )
 
+
 def test_analysis_type(analysis):
     assert analysis.analysis_type is None
     analysis.analysis_type = "query"
