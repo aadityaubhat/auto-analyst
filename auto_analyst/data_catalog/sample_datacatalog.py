@@ -30,7 +30,15 @@ class SampleDataCatalog(BaseDataCatalog):
         return self.db.get_schema(table_name)
 
     def get_source_tables(self, question: str) -> List[Dict]:
-        """Get source tables for the given question returns empty list if no tables found"""
+        """
+        Get source tables for the given question returns empty list if no tables found
+
+        Args:
+            question (str): Question to be answered
+
+        Returns:
+            List[Dict]: List of tables [{table_name: str, table_description: str}, ...]
+        """
         tables_df = self._get_all_tables()
 
         # Find the appropriate tables to answer the question
@@ -45,10 +53,10 @@ class SampleDataCatalog(BaseDataCatalog):
             table_list = [tbl for tbl in response.split(",")]
             return tables_df[tables_df.table_name.isin(table_list)].to_dict("records")
 
-    def get_table_schemas(self, table_list: List[str]) -> List[pd.DataFrame]:
+    def get_table_schemas(self, table_list: List[str]) -> Dict[str, pd.DataFrame]:
         """Get schema for schema"""
-        result = []
+        result = {}
         for table in table_list:
-            result.append(self._get_table_schema(table))
+            result[table] = self._get_table_schema(table)
 
         return result

@@ -23,7 +23,7 @@ def test_get_source_tables(sample_datacatalog):
 def test_get_table_schemas(sample_datacatalog):
     table_list = ["customer"]
     table_schemas = sample_datacatalog.get_table_schemas(table_list)
-    assert table_schemas[0].equals(
+    assert table_schemas["customer"].equals(
         pd.DataFrame(
             {
                 "cid": [
@@ -119,14 +119,3 @@ def test_get_table_schemas(sample_datacatalog):
             }
         )
     )
-
-
-# llm = OpenAILLM(OPENAI_API_KEY, Model.GPT_4_0314)
-# sample_datacatalog = SampleDataCatalog(llm)
-
-# lst = sample_datacatalog.get_table_schemas(["customer"])
-# print(sample_datacatalog.get_table_schemas(["customer"]))
-
-# print(lst[0].to_dict("records"))
-
-# print(lst[0].describe())
