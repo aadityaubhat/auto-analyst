@@ -13,9 +13,9 @@ def sample_datacatalog():
 
 
 @pytest.mark.llm
-def test_get_source_tables(sample_datacatalog):
+def test_get_source_tables_and_description(sample_datacatalog):
     question = "What is the total sales by country?"
-    input_tables = sample_datacatalog.get_source_tables(question)
+    input_tables = sample_datacatalog.get_source_tables_and_description(question)
     print(input_tables)
     assert ["Invoice"] == [d["table_name"] for d in input_tables]
 

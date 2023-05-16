@@ -3,7 +3,10 @@ from abc import (
     ABC,
 )
 import pandas as pd
-from typing import List
+from typing import (
+    List,
+    Dict,
+)
 
 
 class BaseDataCatalog(ABC):
@@ -15,6 +18,6 @@ class BaseDataCatalog(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def get_source_tables(self, question: str) -> pd.DataFrame:
+    def get_source_tables_and_description(self, question: str) -> List[Dict]:
         """Get source tables for the given question"""
         raise NotImplementedError

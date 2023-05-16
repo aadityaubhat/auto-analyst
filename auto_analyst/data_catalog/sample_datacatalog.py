@@ -29,7 +29,7 @@ class SampleDataCatalog(BaseDataCatalog):
         """Get table schema"""
         return self.db.get_schema(table_name)
 
-    def get_source_tables(self, question: str) -> List[Dict]:
+    def get_source_tables_and_description(self, question: str) -> List[Dict]:
         """
         Get source tables for the given question returns empty list if no tables found
 
