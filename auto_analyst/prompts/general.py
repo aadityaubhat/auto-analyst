@@ -1,8 +1,13 @@
 import jinja2
+from typing import (
+    Dict,
+    List,
+)
 
 environment = jinja2.Environment()
 
-system_prompt = "You are a helpful assistant that determines whether a question can be answered using a SQL query, aggregation or data plot."
+analysis_type_system_prompt = "You are a helpful assistant that determines whether a question can be answered using a SQL query, aggregation or data plot."
+query_system_prompt = "You are a helpful assistant that only writes SQL queries. Reply only with SQL queries."
 
 type_examples = [
     {"question": "How many sales were made in August?", "type": "aggregation"},
@@ -22,21 +27,56 @@ type_examples = [
     {"question": "Histogram of customer age", "type": "plot"},
 ]
 
-type_messages = (
-    [
-        {"role": "system", "content": system_prompt},
+type_messages = [
+    {"role": "system", "content": analysis_type_system_prompt},
+] + [
+    elem
+    for example in type_examples
+    for elem in [
+        {"role": "user", "content": example["question"]},
+        {"role": "assistant", "content": example["type"]},
     ]
-    + [
-        elem
-        for example in type_examples
-        for elem in [
-            {"role": "user", "content": example["question"]},
-            {"role": "assistant", "content": example["type"]},
-        ]
-    ],
-)
+]
+
 
 def render_type_messages(question):
-    return type_messages + [
-        {'role':'user','content':question}
-    ]
+    return type_messages + [{"role": "user", "content": question}]
+
+
+query_template = environment.from_string(
+    """
+Given the following tables
+{% for dct in source_data %}
+{{ dct['table_name'] }}: {{ dct['description'] }}
+{% endfor %}
+
+With schema:
+{% for table, schema_df in table_schema.items() %}
+{{ table }}: {{ schema_df.to_string(index=False) }}
+{% endfor %}
+
+{% if analysis_type != 'plot' %}
+Write a SQL query to answer the following question:
+{{ question }}
+{% else %}
+Write a SQL query to do the following:
+{{ transformation }}
+{% endif %}
+"""
+)
+
+
+def render_query_prompt(
+    question: str,
+    source_data: List[Dict],
+    table_schema: Dict,
+    analysis_type: str,
+    transformation: str = "",
+):
+    return query_template.render(
+        question=question,
+        source_data=source_data,
+        table_schema=table_schema,
+        analysis_type=analysis_type,
+        transformation=transformation,
+    )
