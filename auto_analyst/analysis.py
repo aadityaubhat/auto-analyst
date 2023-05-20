@@ -60,30 +60,29 @@ class Analysis:
     def analysis_type(self) -> str:
         """Get analysis type"""
         return self._analysis_type
-    
+
     @analysis_type.setter
     def analysis_type(self, analysis_type: str) -> None:
         """Set analysis type"""
         self._analysis_type = analysis_type
 
-
     def render_query(self) -> str:
         """Render the query"""
         return self.query
-    
+
     def render_aggregation(self) -> str:
         """Render the aggregation"""
         return self.result_data.to_html()
-    
+
     def render_plot(self) -> str:
         """Render the plot"""
         return self.result_plot.render_html()
 
     def render(self) -> str:
         """Render the analysis"""
-        if self.analysis_type == 'query':
+        if self.analysis_type == "query":
             return self.render_query()
-        if self.analysis_type == 'aggregation':
+        if self.analysis_type == "aggregation":
             return self.render_aggregation()
-        if self.analysis_type == 'plot':
+        if self.analysis_type == "plot":
             return self.render_plot()
