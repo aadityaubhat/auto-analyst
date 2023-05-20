@@ -13,7 +13,11 @@ def analysis():
 def test_metadata(analysis):
     assert analysis.metadata == {}
     analysis.metadata = {"source_data": ["Invoice", "InvoiceLine"]}
-    assert analysis.metadata == {"source_data": ["Invoice", "InvoiceLine"]}
+    analysis.metadata = {"table_schema": {"Invoice": ["InvoiceId", "Total"]}}
+    assert analysis.metadata == {
+        "source_data": ["Invoice", "InvoiceLine"],
+        "table_schema": {"Invoice": ["InvoiceId", "Total"]},
+    }
 
 
 def test_query(analysis):
