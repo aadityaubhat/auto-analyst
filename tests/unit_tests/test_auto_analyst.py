@@ -1,4 +1,4 @@
-from auto_analyst.auto_analyst_new import AutoAnalyst
+from auto_analyst.auto_analyst import AutoAnalyst
 from auto_analyst.databases.sqlite import SQLLite
 from auto_analyst.data_catalog.sample_datacatalog import SampleDataCatalog
 from auto_analyst.config import OPENAI_API_KEY
