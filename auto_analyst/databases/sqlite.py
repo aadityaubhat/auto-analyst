@@ -1,31 +1,35 @@
+from flask import g
 from auto_analyst.databases.base import BaseDatabase
 import sqlite3
 import pandas as pd
 
 
 class SQLLite(BaseDatabase):
-    """ "Class for SQLLite"""
+    """Class for SQLLite"""
 
     def __init__(self, db_path=None):
         """Initialize SQLLite"""
         if db_path is None:
             db_path = "auto_analyst/databases/sample_data/chinook.sqlite"
         self.db_path = db_path
-        self.cursor = self._connect()
 
-    def _connect(self):
-        """Connect to SQLLite"""
-        self.connection = sqlite3.connect(self.db_path)
-        return self.connection.cursor()
+    def get_cursor(self):
+        """Connect to SQLLite if not already connected"""
+        if "db" not in g:
+            g.db = sqlite3.connect(self.db_path)
+            g.cursor = g.db.cursor()
+        return g.cursor
 
-    def disconnect(self):
+    def close_connection(self):
         """Disconnect from SQLLite"""
-        self.cursor.close()
-        self.connection.close()
+        db = g.pop("db", None)
+        if db is not None:
+            db.close()
 
     def run_query(self, query: str):
         """Run query"""
-        return pd.read_sql_query(query, self.connection)
+        cursor = self.get_cursor()
+        return pd.read_sql_query(query, g.db)
 
     def list_tables(self):
         """List tables"""
