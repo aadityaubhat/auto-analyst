@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AutoAnalyst</title>
+
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Include custom CSS for chat window -->
+    <style>
+        .chat-window {
+            height: 70vh;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: scroll;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="#">AutoAnalyst</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Analysis</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#">Admin</a>
+                </li>
+            </ul>
+            <span class="navbar-text">
+                Username
+            </span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div id="error" class="alert alert-danger" role="alert" style="display: none;"></div>
+        
+        <div class="chat-window" id="chatWindow">
+            <!-- Chat messages will appear here -->
+        </div>
+
+        <form class="form-inline mt-3" id="messageForm">
+            <input class="form-control mr-sm-2" type="text" placeholder="Enter your message" id="messageInput">
+            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Send</button>
+        </form>
+    </div>
+
+    <!-- Include Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        const csrf_token = "{{ csrf_token() }}";
+        
+        function addToChat(sender, message) {
+            let messageItem = $('<li>');
+            messageItem.text(`${sender}: ${message}`);
+            $('#chatWindow').append(messageItem);
+        }
+
+        function sendMessage() {
+            let message = $("#messageInput").val();
+            if (message.trim() === '') return;
+            
+            $.ajax({
+                url: '/analyze',
+                type: 'POST',
+                data: JSON.stringify({ question: message }),
+                contentType: 'application/json',
+                dataType: 'json',
+                headers: { "X-CSRFToken": csrf_token },
+                success: function(response) {
+                    let result = response.result;
+                    addToChat('You', message);
+                    addToChat('AutoAnalyst', result);
+                    $('#messageInput').val('');
+                    $('#error').hide();  // hide the error message on success
+                },
+                error: function(xhr, status, error) {
+                    let errorMessage = null;
+                    if(xhr.status === 400 || xhr.status === 500) {
+                        let response = JSON.parse(xhr.responseText);
+                        errorMessage = response.error;
+                    } else {
+                        errorMessage = "An unexpected error occurred.";
+                    }
+                    $('#error').html(errorMessage);
+                    $('#error').show(); 
+                }
+            });
+        }
+
+        $('#messageForm').submit(function(e) {
+            e.preventDefault();
+            sendMessage();
+        });
+    </script>
+
+</body>
+
+</html>

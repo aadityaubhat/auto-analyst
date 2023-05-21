@@ -1,121 +1,97 @@
-#! /Users/aadityabhat/Documents/autoanalyst/venv/bin/python
-
-from llms.open_ai_utils import get_chat_reply
-from prompts.prompts import (
-    render_agg_plot_prompt,
-    render_analytical_prompt,
-    render_data_prompt,
-    render_sql_prompt,
-    render_plotly_prompt,
-    render_transform_prompt,
-    system_prompt,
-    system_sql_prompt,
-    system_plotly_prompt,
-    system_transform_prompt,
-    system_yes_no_prompt,
+from auto_analyst.databases.base import BaseDatabase
+from auto_analyst.data_catalog.base import BaseDataCatalog
+from auto_analyst.analysis import Analysis
+from auto_analyst.llms.base import BaseLLM
+from auto_analyst.prompts import (
+    render_type_messages,
+    render_query_prompt,
+    analysis_type_system_prompt,
 )
-import pandas as pd
-import logging
-from files.csv_utils import clean_df
-from files.file_sql import execute_query
+from logging import Logger
 
-logger = logging.getLogger(__name__)
+from typing import (
+    Dict,
+    List,
+)
 
 
-def analyze(question: str, description, data_df: pd.DataFrame) -> str:
-    """
-    Analyze the question and return the answer
-    """
-    data_df = clean_df(data_df)
+logger = Logger(__name__)
+logger.setLevel("DEBUG")
 
-    # Determine whether the question can be answered using aggregate data or a plot
-    agg_plot = get_chat_reply(system_prompt, render_agg_plot_prompt(question))
-    if agg_plot == "aggregate":
-        sql_prompt = render_sql_prompt(
-            table_name="data_table",
-            description=description,
-            schema=data_df.dtypes,
-            sample_data=data_df.head(),
+
+class AutoAnalyst:
+    def __init__(
+        self, database: BaseDatabase, datacatalog: BaseDataCatalog, driver_llm: BaseLLM
+    ) -> None:
+        self.database = database
+        self.datacatalog = datacatalog
+        self.driver_llm = driver_llm
+
+    def _generate_query(
+        self, question: str, source_data: List, table_schema: Dict, analysis_type: str
+    ) -> str:
+        """Generate query to answer the question"""
+        query_prompt = render_query_prompt(
             question=question,
+            source_data=source_data,
+            table_schema=table_schema,
+            analysis_type=analysis_type,
         )
-
-        print(f"SQL prompt: {sql_prompt}")
-        sql_query = get_chat_reply(system_sql_prompt, sql_prompt)
-
-        print(f"SQL query: {sql_query}")
-        result = execute_query(prompt=sql_prompt, query=sql_query, data_table=data_df)
-
-        return result
-
-    elif agg_plot == "plot":
-        transformation_prompt = render_transform_prompt(
-            table_name="data_df",
-            description=description,
-            schema=data_df.dtypes,
-            question=question,
+        query = self.driver_llm.get_code(
+            prompt=query_prompt, system_prompt=analysis_type_system_prompt
         )
+        return query
 
-        transformation_description = get_chat_reply(
-            system_transform_prompt, transformation_prompt
+    def analyze(self, question: str) -> Analysis:
+        """Analyze the question and return the analysis"""
+
+        analysis = Analysis(question)
+        logger.info(f"Analyzing question: {question}")
+
+        # Determine whether the question can be answered using query, aggregate data or a plot
+        analysis_type = self.driver_llm.get_reply(
+            messages=render_type_messages(question)
         )
+        logger.info(f"Analysis type: {analysis_type}")
 
-        print("--" * 20)
-        print(transformation_description)
-        print("--" * 20)
-
-        sql_transform_prompt = render_sql_prompt(
-            table_name="data_df",
-            description=description,
-            schema=data_df.dtypes,
-            sample_data=data_df.head(),
-            transformation=transformation_description,
+        # Determin source data
+        source_tables_dscrptn = self.datacatalog.get_source_tables_and_description(
+            question
         )
+        analysis.metadata = {"source_data": source_tables_dscrptn}
+        logger.info(f"Source tables: {source_tables_dscrptn}")
 
-        print("--" * 20)
-        print(sql_transform_prompt)
-        print("--" * 20)
+        source_tables = [tbl["table_name"] for tbl in source_tables_dscrptn]
 
-        sql_transform_query = get_chat_reply(system_sql_prompt, sql_transform_prompt)
+        table_schema = self.datacatalog.get_table_schemas(source_tables)
+        analysis.metadata = {"table_schema": table_schema}
+        logger.info(f"Table schema: {table_schema}")
 
-        print("--" * 20)
-        print(sql_transform_query)
-        print("--" * 20)
+        if analysis_type == "query":
+            # Generate query
+            query = self._generate_query(
+                question=question,
+                source_data=source_tables_dscrptn,
+                table_schema=table_schema,
+                analysis_type=analysis_type,
+            )
+            analysis.query = query
 
-        transformed_df = execute_query(
-            prompt=sql_transform_prompt, query=sql_transform_query, data_table=data_df
-        )
-        print(transformed_df)
+        elif analysis_type == "aggregation":
+            # Generate query
+            query = self._generate_query(
+                question=question,
+                source_data=source_tables_dscrptn,
+                table_schema=table_schema,
+                analysis_type=analysis_type,
+            )
+            analysis.query = query
 
-        plotly_prompt = render_plotly_prompt(
-            table_name="transformed_df",
-            sample_data=transformed_df.head(),
-            question=question,
-        )
+            # Run query
+            result_data = self.database.run_query(query)
+            analysis.result_data = result_data
 
-        print(f"Plotly prompt: {plotly_prompt}")
-        plotly_code = get_chat_reply(system_plotly_prompt, plotly_prompt)
+        elif analysis_type == "plot":
+            pass
 
-        print(f"""fig = {plotly_code}""")
-        import plotly.express as px
-
-        plotly_code = plotly_code.replace("fig.show()", "")
-        exec(
-            f"""fig = {plotly_code}""",
-        )
-        return locals()["fig"]
-
-    else:
-        return "Could not understand the question"
-
-
-if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--question", type=str, required=True)
-    parser.add_argument("--description", type=str, required=True)
-    parser.add_argument("--csv_path", type=str, required=True)
-    args = parser.parse_args()
-
-    data = pd.read_csv(args.csv_path)
-    analyze(args.question, args.description, data)
+        return analysis
