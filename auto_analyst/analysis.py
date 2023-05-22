@@ -86,3 +86,14 @@ class Analysis:
             return self.render_aggregation()
         if self.analysis_type == "plot":
             return self.render_plot()
+
+    def to_dict(self) -> Dict:
+        """Convert analysis to dict"""
+        # return {
+        #     "question": self._question,
+        #     "analysis_type": self.analysis_type,
+        #     "metadata": self.metadata,
+        #     "query": self.query,
+        # }
+
+        return {"status": "success", "result": self.result_data.to_json()}
