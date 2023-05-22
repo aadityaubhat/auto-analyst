@@ -17,8 +17,39 @@
             overflow-y: scroll;
         }
 
+        .previous-analyses {
+            height: 70vh;
+            border: 1px solid #ddd;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-right: 10px;
+        }
+
+        .message-bar {
+            display: flex;
+            justify-content: space-between;
+        }
+
         .message {
             margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .message.user {
+            background-color: white;
+        }
+
+        .message.autoanalyst {
+            background-color: #f2f2f2;
+        }
+
+        .loading-animation {
+            // Your custom animation styles
+        }
+
+        .sender {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -46,15 +77,17 @@
 
     <div class="container mt-4">
         <div id="error" class="alert alert-danger" role="alert" style="display: none;"></div>
-        
         <div class="chat-window" id="chatWindow">
             <!-- Chat messages will appear here -->
         </div>
 
-        <form class="form-inline mt-3" id="messageForm">
-            <input class="form-control mr-sm-2" type="text" placeholder="Enter your message" id="messageInput">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Send</button>
-        </form>
+        <div class="message-bar">
+            <form class="form-inline w-100" id="messageForm">
+                <input class="form-control mr-sm-2 flex-grow-1" type="text" placeholder="Enter your message" id="messageInput">
+                <button class="btn btn-outline-success my-2 my-sm-0" type="submit" id="submitButton">Send</button>
+            </form>
+        </div>
+    </div>
     </div>
 
     <!-- Include Bootstrap JS and jQuery -->
@@ -63,17 +96,35 @@
 
     <script>
         const csrf_token = "{{ csrf_token() }}";
-        
+
         function addToChat(sender, message) {
-            let messageItem = $('<li>');
-            messageItem.text(`${sender}: ${message}`);
+            let messageItem = $('<div>');
+            messageItem.addClass('message');
+            messageItem.addClass(sender.toLowerCase());
+
+            let senderElement = $('<strong>').text(sender);
+            let senderLine = $('<div>').append(senderElement);
+
+            let messageText = $('<div>').text(message);
+
+            messageItem.append(senderLine);
+            messageItem.append(messageText);
+
             $('#chatWindow').append(messageItem);
         }
 
         function sendMessage() {
             let message = $("#messageInput").val();
             if (message.trim() === '') return;
-            
+
+            addToChat('You', message); // Add message to chat before making the call
+            $("#messageInput").val(''); // Clear the message input
+
+            // Show loading animation
+            let loadingMessage = $('<li class="spin">');
+            loadingMessage.text('AutoAnalyst is thinking...');
+            $('#chatWindow').append(loadingMessage);
+
             $.ajax({
                 url: '/analyze',
                 type: 'POST',
@@ -81,28 +132,29 @@
                 contentType: 'application/json',
                 dataType: 'json',
                 headers: { "X-CSRFToken": csrf_token },
-                success: function(response) {
+                success: function
+                    (response) {
                     let result = response.result;
-                    addToChat('You', message);
+                    loadingMessage.remove(); // Remove loading animation
                     addToChat('AutoAnalyst', result);
-                    $('#messageInput').val('');
                     $('#error').hide();  // hide the error message on success
                 },
-                error: function(xhr, status, error) {
+                error: function (xhr, status, error) {
+                    loadingMessage.remove(); // Remove loading animation
                     let errorMessage = null;
-                    if(xhr.status === 400 || xhr.status === 500) {
+                    if (xhr.status === 400 || xhr.status === 500) {
                         let response = JSON.parse(xhr.responseText);
                         errorMessage = response.error;
                     } else {
                         errorMessage = "An unexpected error occurred.";
                     }
                     $('#error').html(errorMessage);
-                    $('#error').show(); 
+                    $('#error').show();
                 }
             });
         }
 
-        $('#messageForm').submit(function(e) {
+        $('#messageForm').submit(function (e) {
             e.preventDefault();
             sendMessage();
         });
