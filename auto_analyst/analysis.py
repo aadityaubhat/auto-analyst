@@ -5,16 +5,44 @@ from typing import (
 )
 from plotly.graph_objs import Figure
 import pandas as pd
+from enum import Enum
+import uuid
 
+class AnalysisStatus(Enum):
+    """Class responsible for defining analysis status"""
+    INITIATED = "initiated"
+    QUESTION_TYPE_DONE = "determined question type"
+    SOURCE_DATA_DONE = "determined source data"
+    QUERY_DONE = "query done"
+    RUNNING_QUERY = "running query"
+    COMPLETED = "completed"
+    FAILED = "failed"
 
 class Analysis:
-    def __init__(self, question: str) -> None:
+    def __init__(self, question: str, analysis_uuid:uuid.UUID) -> None:
         self._question = question
+        self._analysis_uuid = analysis_uuid
+        self._analysis_status = AnalysisStatus.INITIATED
         self._analysis_type = None
         self._metadata = {}
         self._query = None
         self._result_data = None
         self._result_plot = None
+
+    @property
+    def analysis_uuid(self) -> uuid.UUID:
+        """Get analysis UUID"""
+        return self._analysis_uuid
+
+    @property
+    def analysis_status(self) -> AnalysisStatus:
+        """Get analysis status"""
+        return self._analysis_status
+    
+    @analysis_status.setter
+    def analysis_status(self, analysis_status: AnalysisStatus) -> None:
+        """Set analysis status"""
+        self._analysis_status = analysis_status
 
     @property
     def metadata(self) -> Dict:

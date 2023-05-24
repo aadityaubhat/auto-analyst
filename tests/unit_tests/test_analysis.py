@@ -2,11 +2,12 @@ from auto_analyst.analysis import Analysis
 import pandas as pd
 import plotly.express as px
 import pytest
-
+from uuid import uuid4
+from auto_analyst.analysis import AnalysisStatus
 
 @pytest.fixture(scope="module")
 def analysis():
-    analysis = Analysis("What is the total revenue?")
+    analysis = Analysis("What is the total revenue?", uuid4())
     yield analysis
 
 
@@ -52,3 +53,11 @@ def test_analysis_type(analysis):
     assert analysis.analysis_type == "aggregation"
     analysis.analysis_type = "plot"
     assert analysis.analysis_type == "plot"
+
+
+def test_analysis_status(analysis):
+    assert analysis.analysis_status == AnalysisStatus.INITIATED
+    analysis.analysis_status = AnalysisStatus.COMPLETED
+    assert analysis.analysis_status == AnalysisStatus.COMPLETED
+    analysis.analysis_status = AnalysisStatus.FAILED
+    assert analysis.analysis_status == AnalysisStatus.FAILED
