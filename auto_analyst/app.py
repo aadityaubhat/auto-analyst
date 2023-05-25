@@ -35,7 +35,7 @@ def analyze():
         analysis = auto_analyst.analyze(question)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    return jsonify(analysis.to_dict())
+    return jsonify(analysis.get_results())
 
 
 @app.route("/")

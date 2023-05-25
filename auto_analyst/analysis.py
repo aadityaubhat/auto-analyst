@@ -7,9 +7,12 @@ from plotly.graph_objs import Figure
 import pandas as pd
 from enum import Enum
 import uuid
+import plotly
+
 
 class AnalysisStatus(Enum):
     """Class responsible for defining analysis status"""
+
     INITIATED = "initiated"
     QUESTION_TYPE_DONE = "determined question type"
     SOURCE_DATA_DONE = "determined source data"
@@ -18,16 +21,29 @@ class AnalysisStatus(Enum):
     COMPLETED = "completed"
     FAILED = "failed"
 
+
 class Analysis:
-    def __init__(self, question: str, analysis_uuid:uuid.UUID) -> None:
+    """Class responsible for defining analysis"""
+
+    instances = {}
+
+    def __init__(
+        self, question: str, analysis_uuid: Union[uuid.UUID, None] = None
+    ) -> None:
         self._question = question
-        self._analysis_uuid = analysis_uuid
         self._analysis_status = AnalysisStatus.INITIATED
         self._analysis_type = None
         self._metadata = {}
         self._query = None
         self._result_data = None
         self._result_plot = None
+
+        if analysis_uuid is None:
+            self._analysis_uuid = uuid.uuid4()
+        else:
+            self._analysis_uuid = analysis_uuid
+
+        Analysis.instances[self._analysis_uuid] = self
 
     @property
     def analysis_uuid(self) -> uuid.UUID:
@@ -38,7 +54,7 @@ class Analysis:
     def analysis_status(self) -> AnalysisStatus:
         """Get analysis status"""
         return self._analysis_status
-    
+
     @analysis_status.setter
     def analysis_status(self, analysis_status: AnalysisStatus) -> None:
         """Set analysis status"""
@@ -106,22 +122,30 @@ class Analysis:
         """Render the plot"""
         return self.result_plot.render_html()
 
-    def render(self) -> str:
-        """Render the analysis"""
-        if self.analysis_type == "query":
-            return self.render_query()
-        if self.analysis_type == "aggregation":
-            return self.render_aggregation()
-        if self.analysis_type == "plot":
-            return self.render_plot()
+    def get_results(self) -> Dict:
+        if isinstance(self.result_plot, plotly.graph_objs._figure.Figure):
+            return {
+                "result": {
+                    "analysis_type": self.analysis_type,
+                    "plot": self.plot.to_json(),
+                    "data": self.result_data.to_dict(orient="records"),
+                    "query": self.query,
+                }
+            }
+        elif isinstance(self.result_data, pd.DataFrame):
+            return {
+                "result": {
+                    "analysis_type": self.analysis_type,
+                    "data": self.result_data.to_dict(orient="records"),
+                    "query": self.query,
+                }
+            }
+        else:
+            return {
+                "result": {"analysis_type": self.analysis_type, "query": self.query}
+            }
 
-    def to_dict(self) -> Dict:
-        """Convert analysis to dict"""
-        # return {
-        #     "question": self._question,
-        #     "analysis_type": self.analysis_type,
-        #     "metadata": self.metadata,
-        #     "query": self.query,
-        # }
-
-        return {"status": "success", "result": self.result_data.to_json()}
+    @classmethod
+    def get_instance(cls, analysis_uuid: uuid.UUID) -> str:
+        """Get analysis instance"""
+        return Analysis.instances[analysis_uuid]
