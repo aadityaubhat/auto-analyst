@@ -51,8 +51,43 @@ class OpenAILLM(BaseLLM):
 
         return response["choices"][0]["message"]["content"].strip()
 
+    async def get_reply_async(
+        self, prompt=None, system_prompt=None, messages: list = []
+    ):
+        if not prompt and not system_prompt and not messages:
+            raise ValueError(
+                "Please provide either messages or prompt and system_prompt"
+            )
+        elif not messages:
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt},
+            ]
+
+        response = await openai.ChatCompletion.create(
+            model=self.model.value,
+            messages=messages,
+            temperature=self.temperature,
+            frequency_penalty=self.frequency_penalty,
+        )
+
+        return response["choices"][0]["message"]["content"].strip()
+
     def get_code(self, prompt=None, system_prompt=None, messages: list = []):
         reply = self.get_reply(prompt, system_prompt, messages)
+        pattern = r"```(.*?)```"
+        matches = re.findall(pattern, reply, re.DOTALL)
+
+        if matches:
+            code = matches[0].strip()
+            return code
+        else:
+            raise ValueError(f"No code found in the reply: \n{reply}")
+
+    async def get_code_async(
+        self, prompt=None, system_prompt=None, messages: list = []
+    ):
+        reply = await self.get_reply_async(prompt, system_prompt, messages)
         pattern = r"```(.*?)```"
         matches = re.findall(pattern, reply, re.DOTALL)
 
