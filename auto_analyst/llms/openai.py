@@ -2,6 +2,9 @@ from auto_analyst.llms.base import BaseLLM
 import openai
 import enum
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Model(enum.Enum):
@@ -42,12 +45,14 @@ class OpenAILLM(BaseLLM):
                 {"role": "user", "content": prompt},
             ]
 
+        logger.info(f"Messages: {messages}")
         response = openai.ChatCompletion.create(
             model=self.model.value,
             messages=messages,
             temperature=self.temperature,
             frequency_penalty=self.frequency_penalty,
         )
+        logger.info(f"Response: {response}")
 
         return response["choices"][0]["message"]["content"].strip()
 
@@ -63,13 +68,14 @@ class OpenAILLM(BaseLLM):
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt},
             ]
-
+        logger.info(f"Messages: {messages}")
         response = await openai.ChatCompletion.create(
             model=self.model.value,
             messages=messages,
             temperature=self.temperature,
             frequency_penalty=self.frequency_penalty,
         )
+        logger.info(f"Response: {response}")
 
         return response["choices"][0]["message"]["content"].strip()
 

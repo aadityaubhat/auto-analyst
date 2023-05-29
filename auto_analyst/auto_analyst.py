@@ -7,7 +7,7 @@ from auto_analyst.prompts import (
     render_query_prompt,
     analysis_type_system_prompt,
 )
-from logging import Logger
+import logging
 
 from typing import (
     Dict,
@@ -15,8 +15,7 @@ from typing import (
 )
 
 
-logger = Logger(__name__)
-logger.setLevel("DEBUG")
+logger = logging.getLogger(__name__)
 
 
 class AutoAnalyst:

@@ -10,6 +10,9 @@ from auto_analyst.prompts.data_catalog import (
     system_prompt,
 )
 from auto_analyst.databases.sqlite import SQLLite
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SampleDataCatalog(BaseDataCatalog):
@@ -40,6 +43,7 @@ class SampleDataCatalog(BaseDataCatalog):
             List[Dict]: List of tables [{table_name: str, table_description: str}, ...]
         """
         tables_df = self._get_all_tables()
+        logger.info(f"Question: {question}")
 
         # Find the appropriate tables to answer the question
         response = self.llm.get_reply(
@@ -47,10 +51,11 @@ class SampleDataCatalog(BaseDataCatalog):
             prompt=render_source_tables_prompt(question, tables_df),
         )
 
-        if response == "No Tables Found":
+        if response.lower().strip() == "no tables found":
             return []
         else:
             table_list = [tbl for tbl in response.split(",")]
+            logger.info(f"Tables: {table_list}")
             return tables_df[tables_df.table_name.isin(table_list)].to_dict("records")
 
     def get_table_schemas(self, table_list: List[str]) -> Dict[str, pd.DataFrame]:
