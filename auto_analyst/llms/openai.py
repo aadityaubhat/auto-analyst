@@ -88,7 +88,7 @@ class OpenAILLM(BaseLLM):
             code = matches[0].strip()
             return code
         else:
-            raise ValueError(f"No code found in the reply: \n{reply}")
+            return reply
 
     async def get_code_async(
         self, prompt=None, system_prompt=None, messages: list = []
@@ -101,4 +101,4 @@ class OpenAILLM(BaseLLM):
             code = matches[0].strip()
             return code
         else:
-            raise ValueError(f"No code found in the reply: \n{reply}")
+            return reply

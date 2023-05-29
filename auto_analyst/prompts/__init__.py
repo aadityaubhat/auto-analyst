@@ -4,4 +4,5 @@ from auto_analyst.prompts.general import (
     analysis_type_system_prompt,
     render_type_messages,
     query_system_prompt,
+    render_update_query_prompt,
 )

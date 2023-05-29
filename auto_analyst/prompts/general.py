@@ -80,3 +80,31 @@ def render_query_prompt(
         analysis_type=analysis_type,
         transformation=transformation,
     )
+
+
+update_query_template = environment.from_string(
+    """
+    Instructions:
+    {{ prompt }}
+
+    Query: 
+    {{ query }}
+
+    Failed with following error:
+    {{ error }}
+
+    Please update the query to answer the question.
+    """
+)
+
+
+def render_update_query_prompt(
+    prompt: str,
+    query: str,
+    error: str,
+):
+    return update_query_template.render(
+        prompt=prompt,
+        query=query,
+        error=error,
+    )

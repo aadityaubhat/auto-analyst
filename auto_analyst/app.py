@@ -38,7 +38,10 @@ sample_db = SQLLite()
 sample_datacatalog = SampleDataCatalog(driver_llm)
 
 auto_analyst = AutoAnalyst(
-    database=sample_db, datacatalog=sample_datacatalog, driver_llm=driver_llm
+    database=sample_db,
+    datacatalog=sample_datacatalog,
+    driver_llm=driver_llm,
+    retry_count=3,
 )
 
 
