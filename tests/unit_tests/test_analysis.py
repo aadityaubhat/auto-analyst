@@ -5,6 +5,7 @@ import pytest
 from uuid import uuid4
 from auto_analyst.analysis import AnalysisStatus
 
+
 @pytest.fixture(scope="module")
 def analysis():
     analysis = Analysis("What is the total revenue?", uuid4())
