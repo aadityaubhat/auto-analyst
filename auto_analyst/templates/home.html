@@ -136,7 +136,8 @@
                     (response) {
                     let result = response.result;
                     loadingMessage.remove(); // Remove loading animation
-                    addToChat('AutoAnalyst', result);
+                    let formattedResult = `Analysis Type: ${result.analysis_type}\nData: ${JSON.stringify(result.data)}\nQuery: ${result.query}`;
+                    addToChat('AutoAnalyst', formattedResult);
                     $('#error').hide();  // hide the error message on success
                 },
                 error: function (xhr, status, error) {
