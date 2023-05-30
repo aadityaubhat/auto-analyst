@@ -2,12 +2,12 @@ from flask import Flask, render_template, request, jsonify
 from auto_analyst import AutoAnalyst
 from auto_analyst.databases.sqlite import SQLLite
 from auto_analyst.data_catalog.sample_datacatalog import SampleDataCatalog
-from auto_analyst.config import OPENAI_API_KEY, FLASK_SECRET_KEY
 from auto_analyst.llms.openai import OpenAILLM, Model
 from flask_wtf.csrf import CSRFProtect
 import logging
 from logging.handlers import RotatingFileHandler
 import os
+from .config_parser import parse_config
 
 
 app = Flask(__name__)
@@ -24,24 +24,24 @@ file_handler.setFormatter(
 )
 file_handler.setLevel(logging.INFO)
 logging.getLogger().addHandler(file_handler)
-
 logging.getLogger().setLevel(logging.INFO)
 app.logger.info("Flaskapp startup")
 
+# Parse config
+database, data_catalog, driver_llm, auto_analyst_settings = parse_config()
+retry_count = auto_analyst_settings.get("retry_count", 0)
 
-app.config["SECRET_KEY"] = FLASK_SECRET_KEY
+
+app.config["SECRET_KEY"] = auto_analyst_settings.get("flask_secret_key")
 csrf = CSRFProtect()
 csrf.init_app(app)
 
-driver_llm = OpenAILLM(OPENAI_API_KEY, Model.GPT_3_5_TURBO)
-sample_db = SQLLite()
-sample_datacatalog = SampleDataCatalog(driver_llm)
 
 auto_analyst = AutoAnalyst(
-    database=sample_db,
-    datacatalog=sample_datacatalog,
+    database=database,
+    datacatalog=data_catalog,
     driver_llm=driver_llm,
-    retry_count=3,
+    retry_count=retry_count,
 )
 
 

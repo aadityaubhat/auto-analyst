@@ -35,6 +35,7 @@ class AutoAnalyst:
         self.analysis = None
         self.query = None
         self.query_prompt = None
+        self.retry_count = retry_count
 
     def _generate_query(
         self, question: str, source_data: List, table_schema: Dict, analysis_type: str
@@ -65,14 +66,14 @@ class AutoAnalyst:
         )
         self.analysis.query = self.query
 
-    def _run_query(self, prompt: str, query: str, retry_count: int = 0) -> pd.DataFrame:
+    def _run_query(self, retry_count: int = 0) -> pd.DataFrame:
         """Run query and return the result"""
         try:
-            return self.database.run_query(query)
+            return self.database.run_query(self.query)
         except Exception as e:
             if retry_count > 0:
                 self._update_query(error=str(e))
-                return self._run_query(query, retry_count - 1)
+                return self._run_query(self.query, retry_count - 1)
             else:
                 raise e
 
@@ -118,7 +119,7 @@ class AutoAnalyst:
 
         if analysis_type == "aggregation":
             # Run query
-            result_data = self.database.run_query(self.query, self.retry_count)
+            result_data = self._run_query(self.retry_count)
             self.analysis.result_data = result_data
 
         elif analysis_type == "plot":

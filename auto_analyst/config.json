@@ -1,0 +1,30 @@
+{
+    "llms": {
+        "driverllm": {
+            "name": "Driver LLM",
+            "type": "openai",
+            "api_key": "<your key here>",
+            "model": "GPT_3_5_TURBO"
+        },
+        "data_catalog_llm": {
+            "name": "Data Catalog LLM",
+            "type": "openai",
+            "api_key": "<your key here>",
+            "model": "GPT_3_5_TURBO"
+        }
+    },
+    "database": {
+        "name": "Chinook Sqlite",
+        "type": "sqlite",
+        "path": "auto_analyst/databases/sample_data/chinook.sqlite"
+    },
+    "data_catalog": {
+        "name": "Chinook Data Dictionary",
+        "type": "sample",
+        "path": "auto_analyst/databases/sample_data/chinook_tables.csv"
+    },
+    "auto_analyst_settings": {
+        "flask_secret_key" : "<your key here>",
+        "query_retry_count": 3
+    }
+}

@@ -46,14 +46,34 @@ class OpenAILLM(BaseLLM):
             ]
 
         logger.info(f"Messages: {messages}")
-        response = openai.ChatCompletion.create(
-            model=self.model.value,
-            messages=messages,
-            temperature=self.temperature,
-            frequency_penalty=self.frequency_penalty,
-        )
-        logger.info(f"Response: {response}")
-
+        try:
+            response = openai.ChatCompletion.create(
+                model=self.model.value,
+                messages=messages,
+                temperature=self.temperature,
+                frequency_penalty=self.frequency_penalty,
+            )
+            logger.info(f"Response: {response}")
+        except openai.error.APIConnectionError as e:
+            # Handle connection error here
+            logger.error(f"Failed to connect to OpenAI API: {e}")
+            raise Exception(f"Failed to connect to OpenAI API: {e}")
+        except openai.error.APIError as e:
+            logger.error(f"OpenAI API Error: {e}")
+            raise Exception(f"OpenAI API Error: {e}")
+        except openai.error.RateLimitError as e:
+            logger.error(f"OpenAI API Rate Limit Error: {e}")
+            raise Exception(f"OpenAI API Rate Limit Error: {e}")
+        except openai.error.AuthenticationError as e:
+            logger.error(
+                f"OpenAI API Authentication Error:\nCheck your OpenAI API key in config.json"
+            )
+            raise Exception(
+                f"OpenAI API Authentication Error:\nCheck your OpenAI API key in config.json"
+            )
+        except openai.error.InvalidRequestError as e:
+            logger.error(f"OpenAI API Invalid Request Error: {e}")
+            raise Exception(f"OpenAI API Invalid Request Error: {e}")
         return response["choices"][0]["message"]["content"].strip()
 
     async def get_reply_async(
