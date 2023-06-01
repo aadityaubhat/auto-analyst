@@ -83,7 +83,7 @@ def config():
 
     if form.validate_on_submit():
         file = form.config_file.data
-        filename = secure_filename(file.filename)
+        filename = "config.json"
         file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
 
         with open(f"auto_analyst/{filename}") as f:
