@@ -1,13 +1,16 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from auto_analyst import AutoAnalyst
 from auto_analyst.databases.sqlite import SQLLite
 from auto_analyst.data_catalog.sample_datacatalog import SampleDataCatalog
 from auto_analyst.llms.openai import OpenAILLM, Model
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, generate_csrf
 import logging
 from logging.handlers import RotatingFileHandler
 import os
 from .config_parser import parse_config
+import json
+from .forms import ConfigForm
+from werkzeug.utils import secure_filename
 
 
 app = Flask(__name__)
@@ -31,7 +34,7 @@ app.logger.info("Flaskapp startup")
 database, data_catalog, driver_llm, auto_analyst_settings = parse_config()
 retry_count = auto_analyst_settings.get("retry_count", 0)
 
-
+app.config["UPLOAD_FOLDER"] = "/Users/aadityabhat/Documents/autoanalyst/auto_analyst"
 app.config["SECRET_KEY"] = auto_analyst_settings.get("flask_secret_key")
 csrf = CSRFProtect()
 csrf.init_app(app)
@@ -69,6 +72,30 @@ def analyze():
 @app.route("/")
 def home():
     return render_template("home.html")
+
+
+@app.route("/config", methods=["GET", "POST"])
+def config():
+    form = ConfigForm()
+    config_path = "auto_analyst/config.json"
+    with open(config_path) as f:
+        content = json.load(f)
+
+    if form.validate_on_submit():
+        file = form.config_file.data
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
+
+        with open(f"auto_analyst/{filename}") as f:
+            content = json.load(f)
+        # After form submission, redirect back to the page with 'config_updated' flag
+        return redirect(url_for("config", config_updated=True))
+
+    config_updated = "config_updated" in request.args
+    # Pass 'config_updated' flag to the template
+    return render_template(
+        "config.html", form=form, content=content, config_updated=config_updated
+    )
 
 
 if __name__ == "__main__":

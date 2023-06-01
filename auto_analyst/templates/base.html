@@ -64,7 +64,7 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        const csrf_token = "{{ csrf_token() }}";
+        const csrf_token = "{{ csrf_token }}";
 
         function addToChat(sender, message) {
             let messageItem = $('<div>');

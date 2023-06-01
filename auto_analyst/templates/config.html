@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <div>
+    {% if not config_updated %}
+        <h2>Update Configuration</h2>
+        <form method="POST" enctype="multipart/form-data" class="d-flex">
+            {{ form.hidden_tag() }}
+            <div class="form-group mb-0 mr-2">
+                {{ form.config_file.label(class="sr-only") }}
+                {{ form.config_file(class="form-control-file", id="config_file",
+                onchange="document.getElementById('update_button').style.display = 'inline-block'") }}
+            </div>
+            <button type="submit" class="btn btn-primary" id="update_button" style="display: none;">Update</button>
+        </form>
+        {% else %}
+        <h2>Update Configuration</h2>
+        New Config loaded
+        {% endif %}
+    </div>
+    <div>
+        <h2>Current Configuration</h2>
+        <pre id="config_pre" style="height: 500px; overflow: scroll;">{{ content | tojson(4) }}</pre>
+    </div>
+
+
+</div>
+{% endblock %}
