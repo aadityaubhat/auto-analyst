@@ -103,9 +103,11 @@
                 headers: { "X-CSRFToken": csrf_token },
                 success: function
                     (response) {
-                    let result = response.result;
+                    let result = response;
+                    console.log(result);
                     loadingMessage.remove(); // Remove loading animation
-                    let formattedResult = `Analysis Type: ${result.analysis_type}\nData: ${JSON.stringify(result.data)}\nQuery: ${result.query}`;
+                    let formattedResult = `Analysis Type: ${result.analysis_type}\nMetadata: ${JSON.stringify(result.metadata, null, 2)}\nQuery: ${result.query}\nResult Data: ${JSON.stringify(result.result_data, null, 2)}\nResult Plot: ${result.result_plot}`;
+                    console.log(formattedResult);
                     addToChat('AutoAnalyst', formattedResult);
                     $('#error').hide();  // hide the error message on success
                 },

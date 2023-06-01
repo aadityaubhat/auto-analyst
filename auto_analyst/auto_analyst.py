@@ -27,7 +27,7 @@ class AutoAnalyst:
         database: BaseDatabase,
         datacatalog: BaseDataCatalog,
         driver_llm: BaseLLM,
-        retry_count: int = 0,
+        query_retry_count: int = 0,
     ) -> None:
         self.database = database
         self.datacatalog = datacatalog
@@ -35,7 +35,10 @@ class AutoAnalyst:
         self.analysis = None
         self.query = None
         self.query_prompt = None
-        self.retry_count = retry_count
+        self.query_retry_count = query_retry_count
+        logger.info(
+            f"Initalized AutoAnalyst with retry count: {self.query_retry_count}"
+        )
 
     def _generate_query(
         self, question: str, source_data: List, table_schema: Dict, analysis_type: str
@@ -60,10 +63,12 @@ class AutoAnalyst:
             query=self.query,
             error=error,
         )
+        logger.info(f"Update query prompt: {update_query_prompt}")
         self.query = self.driver_llm.get_code(
             query_system_prompt,
             update_query_prompt,
         )
+        logger.info(f"Updated query: {self.query}")
         self.analysis.query = self.query
 
     def _run_query(self, retry_count: int = 0) -> pd.DataFrame:
@@ -105,7 +110,9 @@ class AutoAnalyst:
         source_tables = [tbl["table_name"] for tbl in source_tables_dscrptn]
 
         table_schema = self.datacatalog.get_table_schemas(source_tables)
-        self.analysis.metadata = {"table_schema": table_schema}
+        self.analysis.metadata = {
+            "table_schema": {k: v.to_dict("records") for k, v in table_schema.items()}
+        }
         logger.info(f"Table schema: {table_schema}")
 
         # Generate query
@@ -119,7 +126,7 @@ class AutoAnalyst:
 
         if analysis_type == "aggregation":
             # Run query
-            result_data = self._run_query(self.retry_count)
+            result_data = self._run_query(self.query_retry_count)
             self.analysis.result_data = result_data
 
         elif analysis_type == "plot":

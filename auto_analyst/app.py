@@ -32,7 +32,8 @@ app.logger.info("Flaskapp startup")
 
 # Parse config
 database, data_catalog, driver_llm, auto_analyst_settings = parse_config()
-retry_count = auto_analyst_settings.get("retry_count", 0)
+query_retry_count = auto_analyst_settings.get("query_retry_count", 0)
+
 
 app.config["UPLOAD_FOLDER"] = "/Users/aadityabhat/Documents/autoanalyst/auto_analyst"
 app.config["SECRET_KEY"] = auto_analyst_settings.get("flask_secret_key")
@@ -44,7 +45,7 @@ auto_analyst = AutoAnalyst(
     database=database,
     datacatalog=data_catalog,
     driver_llm=driver_llm,
-    retry_count=retry_count,
+    query_retry_count=query_retry_count,
 )
 
 
@@ -65,8 +66,8 @@ def analyze():
     except Exception as e:
         app.logger.error(f"Error: {e}")
         return jsonify({"error": str(e)}), 500
-    app.logger.info(f"Analysis Results: {analysis.get_results()}")
-    return jsonify(analysis.get_results())
+    app.logger.info(f"Analysis Results: {analysis.to_json()}")
+    return analysis.to_json()
 
 
 @app.route("/")

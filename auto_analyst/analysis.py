@@ -145,6 +145,19 @@ class Analysis:
                 "result": {"analysis_type": self.analysis_type, "query": self.query}
             }
 
+    def to_json(self) -> Dict:
+        """Convert analysis to JSON"""
+        return {
+            "analysis_uuid": self.analysis_uuid,
+            "analysis_type": self.analysis_type,
+            "metadata": self.metadata,
+            "query": self.query,
+            "result_data": self.result_data.to_dict(orient="records")
+            if isinstance(self.result_data, pd.DataFrame)
+            else None,
+            "result_plot": self.result_plot.to_json() if self.result_plot else None,
+        }
+
     @classmethod
     def get_instance(cls, analysis_uuid: uuid.UUID) -> str:
         """Get analysis instance"""
