@@ -8,7 +8,7 @@ import pandas as pd
 from typing import List
 
 
-class BaseDatabase:
+class BaseDatabase(ABC):
     """Class responsible for defining Database"""
 
     @abstractmethod

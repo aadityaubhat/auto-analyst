@@ -66,10 +66,10 @@ class OpenAILLM(BaseLLM):
             raise Exception(f"OpenAI API Rate Limit Error: {e}")
         except openai.error.AuthenticationError as e:
             logger.error(
-                f"OpenAI API Authentication Error:\nCheck your OpenAI API key in config.json"
+                f"OpenAI API Authentication Error:{e}\nCheck your OpenAI API key in config.json"
             )
             raise Exception(
-                f"OpenAI API Authentication Error:\nCheck your OpenAI API key in config.json"
+                f"OpenAI API Authentication Error:{e}\nCheck your OpenAI API key in config.json"
             )
         except openai.error.InvalidRequestError as e:
             logger.error(f"OpenAI API Invalid Request Error: {e}")

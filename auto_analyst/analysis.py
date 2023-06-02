@@ -1,6 +1,5 @@
 from typing import (
     Dict,
-    List,
     Union,
 )
 from plotly.graph_objs import Figure

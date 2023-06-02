@@ -6,7 +6,6 @@ from auto_analyst.llms.base import BaseLLM
 from auto_analyst.prompts import (
     render_type_messages,
     render_query_prompt,
-    analysis_type_system_prompt,
     query_system_prompt,
     render_update_query_prompt,
 )

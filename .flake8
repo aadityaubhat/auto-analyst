@@ -1,6 +1,9 @@
 [flake8]
 ignore = E501
 max-line-length = 88
+extend-ignore = G010, G201, G202, W503, W291
+extend-select = E203, E231, E501
+enable-extensions = pyflakes
 exclude =
     .git,
     __pycache__,

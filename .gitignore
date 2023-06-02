@@ -7,3 +7,4 @@ data.csv
 *.egg-info
 **/__pycache__/
 logs/
+auto_analyst/config.json

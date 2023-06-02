@@ -28,7 +28,6 @@ class SQLLite(BaseDatabase):
 
     def run_query(self, query: str):
         """Run query"""
-        cursor = self.get_cursor()
         return pd.read_sql_query(query, g.db)
 
     def list_tables(self):

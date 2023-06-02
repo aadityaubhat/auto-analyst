@@ -1,4 +1,4 @@
-from auto_analyst import *
+from ....auto_analyst import prompts
 
 
 def test_render_agg_plot_prompt():

@@ -2,8 +2,6 @@ from abc import (
     abstractmethod,
     ABC,
 )
-import pandas as pd
-from typing import List
 
 
 class BaseLLM(ABC):
