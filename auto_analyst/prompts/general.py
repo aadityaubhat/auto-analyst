@@ -6,14 +6,14 @@ from typing import (
 
 environment = jinja2.Environment()
 
-analysis_type_system_prompt = "You are a helpful assistant that determines whether a question can be answered using a SQL query, aggregation or data plot."
-query_system_prompt = "You are a helpful assistant that only writes SQL queries. Reply only with SQL queries."
+analysis_type_system_prompt = "You are a helpful assistant that determines whether a question is asking for a SQL query, tabular data or a plot."
+query_system_prompt = "You are a helpful assistant that only writes SQL SELECT queries. Reply only with SQL queries."
 
 type_examples = [
-    {"question": "How many sales were made in August?", "type": "aggregation"},
+    {"question": "How many sales were made in August?", "type": "data"},
     {"question": "Relationship between customer age and time spent", "type": "plot"},
     {"question": "Query to get 1000 random customers who live in USA", "type": "query"},
-    {"question": "What is the average amount per transaction?", "type": "aggregation"},
+    {"question": "What is the average amount per transaction?", "type": "data"},
     {
         "question": "1, 7, 14, 28 retention for customer who signed up in August",
         "type": "plot",
@@ -22,7 +22,7 @@ type_examples = [
     {"question": "Query to get last quarters' sales", "type": "query"},
     {
         "question": "Top 10 customers by number of transactions",
-        "type": "aggregation",
+        "type": "data",
     },
     {"question": "Histogram of customer age", "type": "plot"},
 ]
@@ -57,12 +57,9 @@ With schema:
 
 {% if analysis_type != 'plot' %}
 Write a SQL query to answer the following question:
-{{ question }}
-{% else %}
-Write a SQL query to do the following:
-{{ transformation }}
-{% endif %}
-"""
+{{ question }}{% else %}
+Write a SQL query to do the following:{{ transformation }}
+{% endif %}"""
 )
 
 
