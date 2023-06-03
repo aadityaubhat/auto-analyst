@@ -1,7 +1,7 @@
 from flask import Flask
 from auto_analyst.data_catalog.sample_datacatalog import SampleDataCatalog
 from auto_analyst.llms.openai import OpenAILLM, Model
-from auto_analyst.config import OPENAI_API_KEY
+from auto_analyst.config_parser import parse_openai_api_key
 import pandas as pd
 import pytest
 
@@ -14,7 +14,7 @@ def app():
 
 @pytest.fixture(scope="module")
 def sample_datacatalog():
-    llm = OpenAILLM(OPENAI_API_KEY, Model.GPT_3_5_TURBO)
+    llm = OpenAILLM(parse_openai_api_key(), Model.GPT_3_5_TURBO)
     sample_datacatalog = SampleDataCatalog(llm)
     yield sample_datacatalog
     # add any teardown code here if required

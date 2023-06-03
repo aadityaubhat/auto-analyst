@@ -12,16 +12,6 @@ class BaseDatabase(ABC):
     """Class responsible for defining Database"""
 
     @abstractmethod
-    def _connect(self):
-        """Connect to database"""
-        raise NotImplementedError
-
-    @abstractmethod
-    def _disconnect(self):
-        """Disconnect from database"""
-        raise NotImplementedError
-
-    @abstractmethod
     def run_query(self, query: str) -> pd.DataFrame:
         """Run query"""
         raise NotImplementedError

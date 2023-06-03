@@ -28,6 +28,8 @@ class SQLLite(BaseDatabase):
 
     def run_query(self, query: str):
         """Run query"""
+        if "db" not in g:
+            self.get_cursor()
         return pd.read_sql_query(query, g.db)
 
     def list_tables(self):

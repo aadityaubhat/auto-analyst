@@ -2,7 +2,7 @@ from flask import Flask
 from auto_analyst.auto_analyst import AutoAnalyst
 from auto_analyst.databases.sqlite import SQLLite
 from auto_analyst.data_catalog.sample_datacatalog import SampleDataCatalog
-from auto_analyst.config import OPENAI_API_KEY
+from auto_analyst.config_parser import parse_openai_api_key
 from auto_analyst.llms.openai import OpenAILLM, Model
 import pytest
 
@@ -15,7 +15,7 @@ def app():
 
 @pytest.fixture(scope="module")
 def aa():
-    driver_llm = OpenAILLM(OPENAI_API_KEY, Model.GPT_3_5_TURBO)
+    driver_llm = OpenAILLM(parse_openai_api_key(), Model.GPT_3_5_TURBO)
     sample_db = SQLLite()
     sample_datacatalog = SampleDataCatalog(driver_llm)
 
@@ -31,5 +31,5 @@ def test_analyze_query(aa, app):
         analysis = aa.analyze("What is the total sales by country?")
         assert (
             analysis.query.lower()
-            == """select billingcountry, sum(total) as totalsales\nfrom invoice\ngroup by billingcountry""".lower()
+            == """select billingcountry, sum(total) as totalsales\nfrom invoice\ngroup by billingcountry;""".lower()
         )

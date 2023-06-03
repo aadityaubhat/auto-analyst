@@ -67,3 +67,11 @@ def parse_config():
         raise Exception("Auto Analyst Settings are required")
 
     return database, data_catalog, driver_llm, auto_analyst_settings
+
+
+def parse_openai_api_key():
+    with open("auto_analyst/config.json") as f:
+        config = json.load(f)
+    llm_config = config.get("llms", {})
+    driverllm_config = llm_config.get("driverllm", "")
+    return driverllm_config.get("api_key", "")
