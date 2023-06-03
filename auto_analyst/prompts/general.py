@@ -2,7 +2,9 @@ import jinja2
 from typing import (
     Dict,
     List,
+    Optional,
 )
+from ..data_catalog.base import Table
 
 environment = jinja2.Environment()
 
@@ -46,8 +48,8 @@ def render_type_messages(question):
 query_template = environment.from_string(
     """
 Given the following tables
-{% for dct in source_data %}
-{{ dct['table_name'] }}: {{ dct['description'] }}
+{% for tbl in source_data %}
+{{ tbl.name }}: {{ tbl.description }}
 {% endfor %}
 
 With schema:
@@ -65,7 +67,7 @@ Write a SQL query to do the following:{{ transformation }}
 
 def render_query_prompt(
     question: str,
-    source_data: List[Dict],
+    source_data: List[Table],
     table_schema: Dict,
     analysis_type: str,
     transformation: str = "",
@@ -96,9 +98,9 @@ update_query_template = environment.from_string(
 
 
 def render_update_query_prompt(
-    prompt: str,
-    query: str,
-    error: str,
+    prompt: Optional[str],
+    query: Optional[str],
+    error: Optional[str],
 ):
     return update_query_template.render(
         prompt=prompt,

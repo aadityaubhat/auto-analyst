@@ -1,6 +1,6 @@
 from auto_analyst.databases.base import BaseDatabase
-from auto_analyst.data_catalog.base import BaseDataCatalog
-from auto_analyst.analysis import Analysis
+from auto_analyst.data_catalog.base import BaseDataCatalog, Table
+from auto_analyst.analysis import Analysis, AnalysisType
 import pandas as pd
 from auto_analyst.llms.base import BaseLLM
 from auto_analyst.prompts import (
@@ -14,6 +14,7 @@ import logging
 from typing import (
     Dict,
     List,
+    Tuple,
 )
 
 
@@ -31,104 +32,113 @@ class AutoAnalyst:
         self.database = database
         self.datacatalog = datacatalog
         self.driver_llm = driver_llm
-        self.analysis = None
-        self.query = None
-        self.query_prompt = None
+        # self.analysis: Optional[Analysis] = None
+        # self.query: Optional[str] = None
+        # self.query_prompt: Optional[str] = None
         self.query_retry_count = query_retry_count
         logger.info(
             f"Initalized AutoAnalyst with retry count: {self.query_retry_count}"
         )
 
     def _generate_query(
-        self, question: str, source_data: List, table_schema: Dict, analysis_type: str
-    ) -> None:
+        self,
+        question: str,
+        source_data: List[Table],
+        table_schema: Dict,
+        analysis_type: str,
+    ) -> Tuple[str, str]:
         """Generate query to answer the question"""
-        self.query_prompt = render_query_prompt(
+        query_prompt = render_query_prompt(
             question=question,
             source_data=source_data,
             table_schema=table_schema,
             analysis_type=analysis_type,
         )
-        self.query = self.driver_llm.get_code(
-            prompt=self.query_prompt,
+        query = self.driver_llm.get_code(
+            prompt=query_prompt,
             system_prompt=query_system_prompt,
         )
 
-    def _update_query(self, error: str) -> None:
+        return query_prompt, query
+
+    def _update_query(self, query: str, query_prompt: str, error: str) -> str:
         """Update query to answer the question"""
 
         update_query_prompt = render_update_query_prompt(
-            prompt=self.query_prompt,
-            query=self.query,
+            prompt=query_prompt,
+            query=query,
             error=error,
         )
         logger.info(f"Update query prompt: {update_query_prompt}")
-        self.query = self.driver_llm.get_code(
-            query_system_prompt,
-            update_query_prompt,
+        query = self.driver_llm.get_code(
+            prompt=update_query_prompt,
+            system_prompt=query_system_prompt,
         )
-        logger.info(f"Updated query: {self.query}")
-        self.analysis.query = self.query
+        logger.info(f"Updated query: {query}")
+        return query  # Type: ignore
 
-    def _run_query(self, retry_count: int = 0) -> pd.DataFrame:
+    def _run_query(
+        self, query: str, query_prompt: str, retry_count: int = 0
+    ) -> pd.DataFrame:
         """Run query and return the result"""
         try:
-            return self.database.run_query(self.query)
+            return self.database.run_query(query)
         except Exception as e:
             if retry_count > 0:
-                self._update_query(error=str(e))
-                return self._run_query(self.query, retry_count - 1)
+                query = self._update_query(
+                    query=query, query_prompt=query_prompt, error=str(e)
+                )
+                return self._run_query(
+                    query=query, query_prompt=query_prompt, retry_count=retry_count - 1
+                )
             else:
                 raise e
 
     def analyze(self, question: str) -> Analysis:
         """Analyze the question and return the analysis"""
 
-        self.analysis = Analysis(question)
+        analysis = Analysis(question)
         logger.info(f"Analyzing question: {question}")
 
         # Determine whether the question can be answered using query, aggregate data or a plot
         analysis_type = self.driver_llm.get_reply(
             messages=render_type_messages(question)
-        )
+        )  # type: ignore
         logger.info(f"Analysis type: {analysis_type}")
-        if analysis_type not in ["aggregation", "query", "plot"]:
-            raise ValueError(
-                f"Could not understand the question: {question} \n AutoAnalyst currently only supports Aggregations, Queries and Plots"
-            )
 
-        self.analysis.analysis_type = analysis_type
+        analysis.analysis_type = AnalysisType(analysis_type)
 
-        # Determin source data
-        source_tables_dscrptn = self.datacatalog.get_source_tables_and_description(
-            question
-        )
-        self.analysis.metadata = {"source_data": source_tables_dscrptn}
-        logger.info(f"Source tables: {source_tables_dscrptn}")
+        # Determine source data
+        source_tables = self.datacatalog.get_source_tables(question)
+        if len(source_tables) == 0:
+            raise ValueError("No source tables found")
 
-        source_tables = [tbl["table_name"] for tbl in source_tables_dscrptn]
+        analysis.metadata = {"source_data": [tbl.to_str() for tbl in source_tables]}  # type: ignore
+        logger.info(f"Source tables: {[tbl.to_str() for tbl in source_tables]}")  # type: ignore
 
-        table_schema = self.datacatalog.get_table_schemas(source_tables)
-        self.analysis.metadata = {
-            "table_schema": {k: v.to_dict("records") for k, v in table_schema.items()}
-        }
+        table_schema = self.datacatalog.get_table_schemas([tbl.name for tbl in source_tables])  # type: ignore
+        analysis.metadata = {"table_schema": {k: v.to_dict(orient="records") for k, v in table_schema.items()}}  # type: ignore
         logger.info(f"Table schema: {table_schema}")
 
         # Generate query
-        self._generate_query(
+        query_prompt, query = self._generate_query(
             question=question,
-            source_data=source_tables_dscrptn,
+            source_data=source_tables,  # type: ignore
             table_schema=table_schema,
             analysis_type=analysis_type,
         )
-        self.analysis.query = self.query
+        analysis.query = query
 
-        if analysis_type == "aggregation":
+        if analysis_type == "data":
             # Run query
-            result_data = self._run_query(self.query_retry_count)
-            self.analysis.result_data = result_data
+            result_data = self._run_query(
+                query=query,
+                query_prompt=query_prompt,
+                retry_count=self.query_retry_count,
+            )
+            analysis.result_data = result_data
 
         elif analysis_type == "plot":
             pass
 
-        return self.analysis
+        return analysis

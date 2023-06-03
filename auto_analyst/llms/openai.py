@@ -3,6 +3,11 @@ import openai
 import enum
 import re
 import logging
+from typing import (
+    Optional,
+    List,
+    Dict,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -34,15 +39,21 @@ class OpenAILLM(BaseLLM):
         self.frequency_penalty = frequency_penalty
         openai.api_key = self.api_key
 
-    def get_reply(self, prompt=None, system_prompt=None, messages: list = []):
+    def get_reply(
+        self,
+        prompt: Optional[str] = None,
+        system_prompt: Optional[str] = None,
+        messages: List[Dict[str, str]] = [],
+        **kwargs,
+    ) -> str:
         if not prompt and not system_prompt and not messages:
             raise ValueError(
                 "Please provide either messages or prompt and system_prompt"
             )
         elif not messages:
             messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": prompt},
+                {"role": "system", "content": system_prompt},  # type: ignore[dict-item]
+                {"role": "user", "content": prompt},  # type: ignore[dict-item]
             ]
 
         logger.info(f"Messages: {messages}")
@@ -99,7 +110,13 @@ class OpenAILLM(BaseLLM):
 
         return response["choices"][0]["message"]["content"].strip()
 
-    def get_code(self, prompt=None, system_prompt=None, messages: list = []):
+    def get_code(
+        self,
+        prompt: Optional[str] = None,
+        system_prompt: Optional[str] = None,
+        messages: List[Dict[str, str]] = [],
+        **kwargs,
+    ) -> str:
         reply = self.get_reply(prompt, system_prompt, messages)
         pattern = r"```(.*?)```"
         matches = re.findall(pattern, reply, re.DOTALL)

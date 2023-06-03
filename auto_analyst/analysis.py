@@ -1,6 +1,8 @@
 from typing import (
     Dict,
     Union,
+    Any,
+    Optional,
 )
 from plotly.graph_objs import Figure
 import pandas as pd
@@ -21,21 +23,29 @@ class AnalysisStatus(Enum):
     FAILED = "failed"
 
 
+class AnalysisType(Enum):
+    """Class responsible for defining analysis type"""
+
+    QUERY = "query"
+    DATA = "data"
+    PLOT = "plot"
+
+
 class Analysis:
     """Class responsible for defining analysis"""
 
-    instances = {}
+    instances: Dict[uuid.UUID, "Analysis"] = {}
 
     def __init__(
         self, question: str, analysis_uuid: Union[uuid.UUID, None] = None
     ) -> None:
         self._question = question
         self._analysis_status = AnalysisStatus.INITIATED
-        self._analysis_type = None
-        self._metadata = {}
-        self._query = None
-        self._result_data = None
-        self._result_plot = None
+        self._analysis_type: Optional[AnalysisType] = None
+        self._metadata: Dict["str", Any] = {}
+        self._query: Optional[str] = None
+        self._result_data: Optional[pd.DataFrame] = None
+        self._result_plot: Optional[Figure] = None
 
         if analysis_uuid is None:
             self._analysis_uuid = uuid.uuid4()
@@ -70,7 +80,7 @@ class Analysis:
         self._metadata.update(metadata)
 
     @property
-    def query(self) -> str:
+    def query(self) -> Optional[str]:
         """Get query"""
         return self._query
 
@@ -100,34 +110,25 @@ class Analysis:
         self._result_plot = result_plot
 
     @property
-    def analysis_type(self) -> str:
+    def analysis_type(self) -> Optional[AnalysisType]:
         """Get analysis type"""
         return self._analysis_type
 
     @analysis_type.setter
     def analysis_type(self, analysis_type: str) -> None:
         """Set analysis type"""
-        self._analysis_type = analysis_type
-
-    def render_query(self) -> str:
-        """Render the query"""
-        return self.query
-
-    def render_aggregation(self) -> str:
-        """Render the aggregation"""
-        return self.result_data.to_html()
-
-    def render_plot(self) -> str:
-        """Render the plot"""
-        return self.result_plot.render_html()
+        try:
+            self._analysis_type = AnalysisType(analysis_type)
+        except ValueError:
+            raise ValueError(f"Invalid analysis type: {analysis_type}")
 
     def get_results(self) -> Dict:
         if isinstance(self.result_plot, plotly.graph_objs._figure.Figure):
             return {
                 "result": {
                     "analysis_type": self.analysis_type,
-                    "plot": self.plot.to_json(),
-                    "data": self.result_data.to_dict(orient="records"),
+                    "plot": self.result_plot.to_json(),
+                    "data": self.result_data.to_dict(orient="records"),  # type: ignore
                     "query": self.query,
                 }
             }
@@ -148,7 +149,7 @@ class Analysis:
         """Convert analysis to JSON"""
         return {
             "analysis_uuid": self.analysis_uuid,
-            "analysis_type": self.analysis_type,
+            "analysis_type": self.analysis_type.value if self.analysis_type else None,
             "metadata": self.metadata,
             "query": self.query,
             "result_data": self.result_data.to_dict(orient="records")
@@ -158,6 +159,6 @@ class Analysis:
         }
 
     @classmethod
-    def get_instance(cls, analysis_uuid: uuid.UUID) -> str:
+    def get_instance(cls, analysis_uuid: uuid.UUID) -> "Analysis":
         """Get analysis instance"""
         return Analysis.instances[analysis_uuid]

@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from auto_analyst import AutoAnalyst
+from .auto_analyst import AutoAnalyst
 from auto_analyst.databases.sqlite import SQLLite
 from flask_wtf.csrf import CSRFProtect
 import logging

@@ -4,6 +4,7 @@ archive.py
 data.csv
 .vscode
 .pytest_cache
+.mypy_cache
 *.egg-info
 **/__pycache__/
 logs/

@@ -1,5 +1,6 @@
 from auto_analyst.prompts import general
 import pandas as pd
+from auto_analyst.data_catalog.base import Table
 
 
 def test_render_type_messages():
@@ -40,7 +41,7 @@ def test_render_type_messages():
 
 def test_render_query_prompt():
     question = "What is the average rating of all the movies?"
-    source_data = [{"table_name": "movie", "description": "Movie table"}]
+    source_data = [Table("movie", "Movie table")]
     table_Schema = {
         "movie": pd.DataFrame(
             {
