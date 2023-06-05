@@ -13,7 +13,7 @@ Select the appropriate source tables for the following question:
 {{ question }}
 
 Answer in the following format:
-table1, table2, table3 . . .
+table1, table2, table3, . . . tableN
 
 If no appropriate tables are found, say 'No Tables Found'"""
 )

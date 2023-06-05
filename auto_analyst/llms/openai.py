@@ -118,7 +118,7 @@ class OpenAILLM(BaseLLM):
         **kwargs,
     ) -> str:
         reply = self.get_reply(prompt, system_prompt, messages)
-        pattern = r"```(.*?)```"
+        pattern = r"```.*?\n(.*?)```"
         matches = re.findall(pattern, reply, re.DOTALL)
 
         if matches:
@@ -131,7 +131,7 @@ class OpenAILLM(BaseLLM):
         self, prompt=None, system_prompt=None, messages: list = []
     ):
         reply = await self.get_reply_async(prompt, system_prompt, messages)
-        pattern = r"```(.*?)```"
+        pattern = r"```.*?\n(.*?)```"
         matches = re.findall(pattern, reply, re.DOTALL)
 
         if matches:

@@ -9,7 +9,10 @@ from ..data_catalog.base import Table
 environment = jinja2.Environment()
 
 analysis_type_system_prompt = "You are a helpful assistant that determines whether a question is asking for a SQL query, tabular data or a plot."
-query_system_prompt = "You are a helpful assistant that only writes SQL SELECT queries. Reply only with SQL queries."
+query_system_prompt = "You are a helpful assistant that only writes SQL SELECT queries. Reply only with SQL queries, wrap your query in triple backquotes."
+transformed_data_system_prompt = "You are a helpful assistant that assists in defining the data needed to answer a question."
+plotly_system_prompt = "You are a helpful assistant that only writes Python code using plotly library. Reply only with Python code, wrap your query in triple backquotes."
+yes_no_system_prompt = "You are a helpful assistant that answers yes or no questions. Reply only with yes or no."
 
 type_examples = [
     {"question": "How many sales were made in August?", "type": "data"},
@@ -60,7 +63,8 @@ With schema:
 {% if analysis_type != 'plot' %}
 Write a SQL query to answer the following question:
 {{ question }}{% else %}
-Write a SQL query to do the following:{{ transformation }}
+Write a SQL query to get the following data:
+{{ transformed_data }}
 {% endif %}"""
 )
 
@@ -70,14 +74,14 @@ def render_query_prompt(
     source_data: List[Table],
     table_schema: Dict,
     analysis_type: str,
-    transformation: str = "",
+    transformed_data: str = "",
 ):
     return query_template.render(
         question=question,
         source_data=source_data,
         table_schema=table_schema,
         analysis_type=analysis_type,
-        transformation=transformation,
+        transformed_data=transformed_data,
     )
 
 
@@ -106,4 +110,78 @@ def render_update_query_prompt(
         prompt=prompt,
         query=query,
         error=error,
+    )
+
+
+transformed_data_template = environment.from_string(
+    """
+Given the following tables
+{% for tbl in source_data %}
+{{ tbl.name }}: {{ tbl.description }}
+{% endfor %}
+
+With schema:
+{% for table, schema_df in table_schema.items() %}
+{{ table }}: {{ schema_df.to_string(index=False) }}
+{% endfor %}
+
+Define table 'result_data' needed following question:
+{{ question }}
+
+Answer in following format:
+Name: result_data
+Description: <description of data>
+Schema
+
+Column Name | Type | Description
+"""
+)
+
+
+def render_transformed_data_prompt(
+    question: str,
+    source_data: List[Table],
+    table_schema: Dict,
+):
+    return transformed_data_template.render(
+        question=question,
+        source_data=source_data,
+        table_schema=table_schema,
+    )
+
+
+plotly_code_template = environment.from_string(
+    """
+For dataframe with following schema:
+{{ transformed_data }}
+
+Write plotly code to store the following plot in `fig` variable, don't call fig.show():
+{{ question }}"""
+)
+
+
+def render_plotly_code_prompt(
+    question: str,
+    transformed_data: str,
+):
+    return plotly_code_template.render(
+        question=question,
+        transformed_data=transformed_data,
+    )
+
+
+plotly_code_check_template = environment.from_string(
+    """
+Does the following Python code store a plotly plot in `fig` variable?
+{{ code }}
+
+Answer only with yes or no. If you are unsure, answer no."""
+)
+
+
+def render_plotly_code_check_prompt(
+    code: str,
+):
+    return plotly_code_check_template.render(
+        code=code,
     )

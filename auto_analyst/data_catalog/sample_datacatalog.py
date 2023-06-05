@@ -60,9 +60,14 @@ class SampleDataCatalog(BaseDataCatalog):
         if response.lower().strip() == "no tables found":
             return table_list
         else:
-            tables = [tbl for tbl in response.split(",")]
+            tables = [tbl.strip() for tbl in response.split(",")]
             logger.info(f"Tables: {tables}")
-            logger.info(f"Tables DF: {tables_df[tables_df.table_name.isin(tables)]}")
+            logger.info(
+                f"Length of tables DF: {len(tables_df[tables_df.table_name.isin(tables)])}"
+            )
+            logger.info(
+                f"Length of tables DF: {len(tables_df[tables_df.table_name.isin(tables)])}"
+            )
 
             for _, row in tables_df[tables_df.table_name.isin(tables)].iterrows():
                 table_list.append(
