@@ -140,7 +140,8 @@ class AutoAnalyst:
 
     def _run_plotly_code(self, plotly_code: str, result_data: pd.DataFrame) -> Figure:
         namespace = {"result_data": result_data}
-        plotly_code.replace("fig.show()", "")
+        plotly_code = plotly_code.replace("fig.show()", "")
+        logger.info(f"Plotly code to be executed: {plotly_code}")
         exec(plotly_code, namespace)
         return namespace["fig"]  # type: ignore
 
