@@ -6,13 +6,14 @@ function addToChat(sender, message) {
     let senderElement = $('<strong>').text(sender);
     let senderLine = $('<div>').append(senderElement);
 
-    let messageText = $('<div>').text(message);
+    let messageContent = typeof message === 'string' ? $('<div>').text(message) : message;
 
     messageItem.append(senderLine);
-    messageItem.append(messageText);
+    messageItem.append(messageContent);
 
     $('#chatWindow').append(messageItem);
 }
+
 
 function sendMessage() {
     let message = $("#messageInput").val();
@@ -33,16 +34,49 @@ function sendMessage() {
         contentType: 'application/json',
         dataType: 'json',
         headers: { "X-CSRFToken": csrf_token },
-        success: function
-            (response) {
+        success: function(response) {
             let result = response;
             console.log(result);
             loadingMessage.remove(); // Remove loading animation
-            let formattedResult = `Analysis Type: ${result.analysis_type}\nMetadata: ${JSON.stringify(result.metadata, null, 2)}\nQuery: ${result.query}\nResult Data: ${JSON.stringify(result.result_data, null, 2)}\nResult Plot: ${result.result_plot}`;
-            console.log(formattedResult);
-            addToChat('AutoAnalyst', formattedResult);
+            
+            // Get column names dynamically from result_data
+            let colNames = Object.keys(result.result_data[0]);
+            
+            // Create colModel dynamically
+            let colModel = colNames.map(function(name) {
+                return {
+                    name: name,
+                    index: name,
+                    width: 100
+                };
+            });
+        
+            // Create new div element to host the jqGrid
+            let gridContainer = $('<div>');
+            let gridElement = $('<table id="myGrid"></table>');
+            let pagerElement = $('<div id="pager"></div>');
+            gridContainer.append(gridElement);
+            gridContainer.append(pagerElement);
+        
+            gridElement.jqGrid({
+                datatype: "local",
+                data: result.result_data,
+                colNames: colNames,
+                colModel: colModel,
+                rowNum:10,
+                rowList:[10,20,30],
+                pager: pagerElement,
+                sortname: colNames[0],  // use the first column name as the sortname
+                viewrecords: true,
+                sortorder: "desc",
+                caption:"Analysis Results"
+            });
+        
+            // Add gridContainer as a new message to the chat
+            addToChat('AutoAnalyst', gridContainer);
+        
             $('#error').hide();  // hide the error message on success
-        },
+        },        
         error: function (xhr, status, error) {
             loadingMessage.remove(); // Remove loading animation
             let errorMessage = null;
