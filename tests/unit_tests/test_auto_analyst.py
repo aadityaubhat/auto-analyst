@@ -31,5 +31,5 @@ def test_analyze_query(aa, app):
         analysis = aa.analyze("What is the total sales by country?")
         assert (
             analysis.query.lower()
-            == """select billingcountry, sum(total) as totalsales\nfrom invoice\ngroup by billingcountry;""".lower()
+            == """select c.country, sum(il.unitprice * il.quantity) as totalsales\nfrom customer c\njoin invoice i on c.customerid = i.customerid\njoin invoiceline il on i.invoiceid = il.invoiceid\ngroup by c.country;""".lower()
         )

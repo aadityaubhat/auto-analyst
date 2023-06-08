@@ -17,7 +17,7 @@ class TestSQLLite(unittest.TestCase):
 
     def test_list_tables(self):
         with self.app.app_context():
-            table_list = self.db.list_tables()
+            table_list = self.db.get_tables()
             self.assertEqual(len(table_list), 11)
             self.assertEqual(
                 sorted(table_list["table_name"].tolist()),

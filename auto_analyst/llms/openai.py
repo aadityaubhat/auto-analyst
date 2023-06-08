@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class Model(enum.Enum):
+    """Enum for OpenAI LLM Models"""
+
     GPT_4 = "gpt-4"
     GPT_4_0314 = "gpt-4-0314"
     GPT_4_32K = "gpt-4-32k"
@@ -22,7 +24,13 @@ class Model(enum.Enum):
 
 
 class OpenAILLM(BaseLLM):
-    """Class for OpenAI LLM"""
+    """Class for OpenAI LLM
+    Attributes:
+        api_key (str): OpenAI API Key
+        model (Model): OpenAI LLM Model
+        temperature (float): Temperature for generating reply
+        frequency_penalty (float): Frequency penalty for generating reply
+        presence_penalty (float): Presence penalty for generating reply"""
 
     def __init__(
         self,
@@ -32,11 +40,19 @@ class OpenAILLM(BaseLLM):
         frequency_penalty: float = 0,
         presence_penalty: float = 0,
     ):
-        """Initialize OpenAI LLM"""
+        """Initialize OpenAI LLM
+        Args:
+            api_key (str): OpenAI API Key
+            model (Model): OpenAI LLM Model
+            temperature (float): Temperature for generating reply
+            frequency_penalty (float): Frequency penalty for generating reply
+            presence_penalty (float): Presence penalty for generating reply
+        """
         self.api_key = api_key
         self.model = model
         self.temperature = temperature
         self.frequency_penalty = frequency_penalty
+        self.presence_penalty = presence_penalty
         openai.api_key = self.api_key
 
     def get_reply(
@@ -46,6 +62,13 @@ class OpenAILLM(BaseLLM):
         messages: List[Dict[str, str]] = [],
         **kwargs,
     ) -> str:
+        """Get reply from OpenAI LLM
+        Args:
+            prompt (Optional[str]): Prompt to be used for generating reply
+            system_prompt (Optional[str]): System prompt to be used for generating reply
+            messages (List[Dict[str, str]]): List of messages to be used for generating reply
+        Returns:
+            str: Reply from OpenAI LLM"""
         if not prompt and not system_prompt and not messages:
             raise ValueError(
                 "Please provide either messages or prompt and system_prompt"
@@ -117,6 +140,13 @@ class OpenAILLM(BaseLLM):
         messages: List[Dict[str, str]] = [],
         **kwargs,
     ) -> str:
+        """Get code from OpenAI LLM reply
+        Args:
+            prompt (Optional[str]): Prompt to be used for generating reply
+            system_prompt (Optional[str]): System prompt to be used for generating reply
+            messages (List[Dict[str, str]]): List of messages to be used for generating reply
+        Returns:
+            str: Code from OpenAI LLM reply"""
         reply = self.get_reply(prompt, system_prompt, messages)
         pattern = r"```.*?\n(.*?)```"
         matches = re.findall(pattern, reply, re.DOTALL)

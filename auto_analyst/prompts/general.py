@@ -44,7 +44,12 @@ type_messages = [
 ]
 
 
-def render_type_messages(question):
+def render_type_messages(question) -> List[Dict[str, str]]:
+    """Render type messages
+    Args:
+        question (str): Question to be answered
+    Returns:
+        List[Dict[str, str]]: List of messages to be displayed to the user"""
     return type_messages + [{"role": "user", "content": question}]
 
 
@@ -75,7 +80,16 @@ def render_query_prompt(
     table_schema: Dict,
     analysis_type: str,
     transformed_data: str = "",
-):
+) -> str:
+    """Render prompt to write a SQL query
+    Args:
+        question (str): Question to be answered
+        source_data (List[Table]): List of source tables
+        table_schema (Dict): Dictionary of table schemas
+        analysis_type (str): Type of analysis
+        transformed_data (str, optional): Transformed data. Defaults to "".
+    Returns:
+        str: Prompt to write a SQL query"""
     return query_template.render(
         question=question,
         source_data=source_data,
@@ -105,7 +119,14 @@ def render_update_query_prompt(
     prompt: Optional[str],
     query: Optional[str],
     error: Optional[str],
-):
+) -> str:
+    """Render prompt to update a SQL query
+    Args:
+        prompt (Optional[str]): Prompt to update the query
+        query (Optional[str]): SQL query
+        error (Optional[str]): Error message
+    Returns:
+        str: Prompt to update a SQL query"""
     return update_query_template.render(
         prompt=prompt,
         query=query,
@@ -142,7 +163,14 @@ def render_transformed_data_prompt(
     question: str,
     source_data: List[Table],
     table_schema: Dict,
-):
+) -> str:
+    """Render prompt to define transformed data
+    Args:
+        question (str): Question to be answered
+        source_data (List[Table]): List of source tables
+        table_schema (Dict): Dictionary of table schemas
+    Returns:
+        str: Prompt to define transformed data"""
     return transformed_data_template.render(
         question=question,
         source_data=source_data,
@@ -163,7 +191,13 @@ Write plotly code to store the following plot in `fig` variable, don't call fig.
 def render_plotly_code_prompt(
     question: str,
     transformed_data: str,
-):
+) -> str:
+    """Render prompt to write plotly code
+    Args:
+        question (str): Question to be answered
+        transformed_data (str): Transformed data
+    Returns:
+        str: Prompt to write plotly code"""
     return plotly_code_template.render(
         question=question,
         transformed_data=transformed_data,
@@ -181,7 +215,12 @@ Answer only with yes or no. If you are unsure, answer no."""
 
 def render_plotly_code_check_prompt(
     code: str,
-):
+) -> str:
+    """Render prompt to check plotly code
+    Args:
+        code (str): Python code
+    Returns:
+        str: Prompt to check plotly code"""
     return plotly_code_check_template.render(
         code=code,
     )

@@ -19,5 +19,9 @@ If no appropriate tables are found, say 'No Tables Found'"""
 )
 
 
-def render_source_tables_prompt(question, tables_df):
+def render_source_tables_prompt(question, tables_df) -> str:
+    """Render prompt to select source tables for a given question
+    Args:
+        question (str): Question to be answered
+        tables_df (pd.DataFrame): Dataframe containing list of all tables"""
     return source_tables_template.render(question=question, tables_df=tables_df)

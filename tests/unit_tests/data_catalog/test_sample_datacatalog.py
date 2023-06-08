@@ -17,7 +17,6 @@ def sample_datacatalog():
     llm = OpenAILLM(parse_openai_api_key(), Model.GPT_3_5_TURBO)
     sample_datacatalog = SampleDataCatalog(llm)
     yield sample_datacatalog
-    # add any teardown code here if required
 
 
 @pytest.mark.llm
@@ -26,7 +25,7 @@ def test_get_source_tables(sample_datacatalog, app):
         question = "What is the total sales by country?"
         input_tables = sample_datacatalog.get_source_tables(question)
         print(input_tables)
-        assert ["Invoice"] == [d.name for d in input_tables]
+        assert ["Customer", "Invoice", "InvoiceLine"] == [d.name for d in input_tables]
 
 
 def test_get_table_schemas(sample_datacatalog, app):

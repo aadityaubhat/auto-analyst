@@ -1,5 +1,3 @@
-"""Base implementation for tools or skills."""
-
 from abc import (
     abstractmethod,
     ABC,
@@ -9,7 +7,7 @@ from typing import List
 
 
 class BaseDatabase(ABC):
-    """Class responsible for defining Database"""
+    """Abstract Base Class responsible for defining Database"""
 
     @abstractmethod
     def run_query(self, query: str) -> pd.DataFrame:
@@ -17,7 +15,7 @@ class BaseDatabase(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def list_tables(self) -> List:
+    def get_tables(self) -> List:
         """List tables"""
         raise NotImplementedError
 

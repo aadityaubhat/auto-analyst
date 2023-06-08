@@ -20,20 +20,34 @@ logger = logging.getLogger(__name__)
 
 
 class SampleDataCatalog(BaseDataCatalog):
-    """Sample Data Catalog"""
+    """Sample Data Catalog
+
+    Attributes:
+        llm (BaseLLM): Language Model Manager
+        db (SQLLite): Database object"""
 
     def __init__(self, llm: BaseLLM):
-        """Initialize Sample Data Catalog"""
+        """Initialize Sample Data Catalog
+
+        Args:
+            llm (BaseLLM): Language Model Manager"""
         self.llm = llm
         self.db = SQLLite()
 
     def _get_all_tables(self) -> pd.DataFrame:
-        """Get all tables"""
+        """Get all tables
+        Returns:
+            pd.DataFrame: Dataframe containing all tables"""
         df_path = "auto_analyst/databases/sample_data/chinook_tables.csv"
         return pd.read_csv(df_path)
 
     def _get_table_schema(self, table_name: str) -> pd.DataFrame:
-        """Get table schema"""
+        """Get table schema
+
+        Args:
+            table_name (str): Name of the table
+        Returns:
+            pd.DataFrame: Dataframe containing table schema"""
         return self.db.get_schema(table_name)
 
     def get_source_tables(self, question: str) -> List[Optional[Table]]:
@@ -77,7 +91,13 @@ class SampleDataCatalog(BaseDataCatalog):
             return table_list
 
     def get_table_schemas(self, table_list: List[str]) -> Dict[str, pd.DataFrame]:
-        """Get schema for schema"""
+        """Get schema for schema
+
+        Args:
+            table_list (List[str]): List of table names
+        Returns:
+            Dict[str, pd.DataFrame]: Dictionary of table schemas {table_name: table_schema}
+        """
         result = {}
         for table in table_list:
             result[table] = self._get_table_schema(table)
