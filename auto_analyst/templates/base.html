@@ -44,8 +44,16 @@
             background-color: #f2f2f2;
         }
 
+        .query-content {
+            padding: 10px;
+            background-color: white !important;
+            border-radius: 5px;
+            color: black !important;
+            font-family: monospace;
+        }
+
         .loading-animation {
-            // Your custom animation styles
+            // Your custom animation styless
         }
 
         .sender {
@@ -71,10 +79,17 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
 
     <!-- jqGrid library -->
-    <link rel="stylesheet" type="text/css" media="screen" href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/css/ui.jqgrid.css"/>
+    <link rel="stylesheet" type="text/css" media="screen"
+        href="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/css/ui.jqgrid.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/free-jqgrid/4.15.5/jquery.jqgrid.min.js"></script>
 
+    <!-- Include clipboard.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.8/clipboard.min.js"></script>
+
+    <!-- Include Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Include custom JS -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 
     <!-- plotly -->
